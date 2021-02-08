@@ -17,7 +17,7 @@ def opfs(X, Nc=1):
     (m,v) = X.shape 
     L = v # l is number of variables (columns)
     Y = X
-    VT=np.var(Y, axis=0) # Y is row vector containing variance for each column
+    VT=Y.var(axis=0) # Y is column vector containing variance for each column
 
     #
     # initialize storage variables
@@ -39,10 +39,10 @@ def opfs(X, Nc=1):
 
         for i in range(0,L):
             x = Y[:,i] # column i
-            x_star = x.conjugate().T
+            x_star = x.T
+            
             EFS[i] = (x_star.dot(t1)**2) / (x_star.dot(x) + np.finfo(float).eps)
-
-        #
+        # 
         # select index of max efs
         #
         idx = np.argmax(EFS)
@@ -54,7 +54,7 @@ def opfs(X, Nc=1):
         x = np.atleast_2d(x)
         
         # theta
-        th = np.matmul(Y, np.linalg.pinv(x))
+        th = Y.dot(np.linalg.pinv(x))
         Yhat = x.dot(th)
         Y = Y-Yhat
 
@@ -65,7 +65,10 @@ def opfs(X, Nc=1):
         M.append(th.T)
         YhatP = YhatP + Yhat
         compID.append(idx)
-        VarEx.append(np.var(np.array(YhatP)) / VT*100)
+        print('VT')
+        print(VT)
+        VarEx.append(np.var(np.divide(YhatP, VT*100)))
+        #YhatP / VT*100)
     
     # return S, M, VarEx, compId
     return S, M, VarEx, compID
