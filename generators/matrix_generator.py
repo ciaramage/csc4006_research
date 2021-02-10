@@ -1,48 +1,40 @@
 import numpy as np
+import math
 from sklearn import preprocessing
+from helpers.MatrixTypes import MatrixTypes
 
-square_dimensions = [10, 20, 50, 100, 200, 300, 400, 500, 1000 ]
-not_square_dimensions = [[10, 20, 30, 40, 50, 60, 70], [100, 200, 500, 1000, 2000]]
+def independent_mat(mat_size:list):
+    # generate matrix with random values between 0 and 1
+    mat = np.random.rand(mat_size[0], mat_size[1])
+    return mat
 
-#def get_linearly_independent_matrix(mat, n, d):
-#    r = np.linalg.matrix_rank(mat)
-#    while r < d:  # check the matrix rank to verify if matrix has linearly independent column vectors
-#        mat = np.random.rand(n, d)
-#        r = np.linalg.matrix_rank(mat)
-#    return mat
-
-
-def square_matrix():
-    matrices = []
-    for i in range(len(square_dimensions)):
-        print(str(square_dimensions[i]) + "\t")
-        mat = np.random.rand(square_dimensions[i], square_dimensions[i])  # matrix with random values
-        #mat = get_linearly_independent_matrix(mat, square_dimensions[i], square_dimensions[i])
-        #mat = np.linalg.pinv(mat)  # Moore Penrose pseudo inverse of a matrix
-
-        # standardize data attributes to have mean of zero and standard deviation of 1
-        mat = preprocessing.scale(mat)
-        matrices.append(mat)
-    return matrices
+def zero_mean_mat(mat_size:list):
+    # generate matrix with random values between 0 and 1
+    mat = np.random.rand(mat_size[0], mat_size[1])
+    # scale to zero mean but not unit variance
+    mat = preprocessing.scale(mat, with_mean=True, with_std=False)
+    return mat
+    
+def function_as_mat(mat_size:list):
+    # each element is dependent on its row and column index
+    # element wise -> col_idx * cosine(row_idx)
+    mat = np.fromfunction(lambda x, y: y*np.cos(x), mat_size, dtype=float)
+    return mat
 
 
-def not_square_matrix():
-    matrices = []
-    for i in range(len(not_square_dimensions[0])):
-        for j in range(len(not_square_dimensions[1])):
-            mat = np.random.rand(not_square_dimensions[0][i], not_square_dimensions[1][j])
-            #mat = get_linearly_independent_matrix(mat, not_square_dimensions[0][i], not_square_dimensions[1][j])
-            # Moore Penrose pseudo inverse of a matrix
-            #mat = np.linalg.pinv(mat)
-            mat = preprocessing.scale(mat)
-            matrices.append(mat)
-            matrices.append(mat)
-    return matrices
-
-
-def get_matrix(is_square):
-    if is_square:
-        return square_matrix()
+def get_matrix(mat_size:list, mat_type:MatrixTypes):
+    if mat_type == MatrixTypes.INDEPENDENT:
+        return independent_mat(mat_size)
+    elif mat_type == MatrixTypes.ZERO_MEAN:
+        return zero_mean_mat(mat_size)
+    elif mat_type == MatrixTypes.FUNCTION_AS_MATRIX:
+        return function_as_mat(mat_size)
+    elif mat_type == MatrixTypes.INDEPENDENT_CORR:
+        mat = independent_mat(mat_size)
+        return np.corrcoef(mat)
     else:
-        return not_square_matrix()
+        mat = zero_mean_mat(mat_size)
+        return np.corrcoef(mat)
 
+
+    
