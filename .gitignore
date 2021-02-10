@@ -1,1 +1,2 @@
-*.pyc
+*.pyc[cod]
+__pycache__/
