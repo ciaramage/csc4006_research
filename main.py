@@ -10,16 +10,14 @@ def main():
     print("main started")
 
     start_time = time.time()
-    # do pca analysis
-    square_mat = get_matrix(True)
-    # not_square_mat = get_matrix(False)
-
     
-    #pca_results = []
-    S, M, VarEx, compId = do_opfs(square_mat[6])
+    mat = get_matrix((5,10), MatrixTypes.FUNCTION_AS_MATRIX)
+
+
+    S, M, VarEx, compId = do_opfs(mat)
     print(S)
-    print(VarEx)
     print(M)
+    print(VarEx)
     print(compId)
       
     duration = time.time() - start_time
@@ -35,11 +33,13 @@ if __name__ == "__main__":
         sys.path.append(path.dirname(path.abspath(__file__)))
         from generators.matrix_generator import get_matrix
         from helpers.algorithms.pca import pca_nipals
+        from helpers.MatrixTypes import MatrixTypes
         from algorithms.fsca import do_fsca
         from algorithms.opfs import do_opfs
     else:
         from .generators.matrix_generator import get_matrix
         from ..helpers.algorithms.pca import pca_nipals
+        from ..helpers.MatrixTypes import MatrixTypes
         from .algorithms.fsca import do_fsca
         from .algorithms.opfs import do_opfs
     main()

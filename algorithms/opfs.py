@@ -46,15 +46,14 @@ def opfs(X, Nc=1):
         # select index of max efs
         #
         idx = np.argmax(EFS)
-
         #
         # deflate matrix
         #
         x = Y[:,idx]
         x = np.atleast_2d(x)
-        
+        x = x.T
         # theta
-        th = Y.dot(np.linalg.pinv(x))
+        th = np.linalg.pinv(x) @ Y
         Yhat = x.dot(th)
         Y = Y-Yhat
 
@@ -68,7 +67,6 @@ def opfs(X, Nc=1):
         print('VT')
         print(VT)
         VarEx.append(np.var(np.divide(YhatP, VT*100)))
-        #YhatP / VT*100)
     
     # return S, M, VarEx, compId
     return S, M, VarEx, compID

@@ -17,8 +17,10 @@ def zero_mean_mat(mat_size:list):
     
 def function_as_mat(mat_size:list):
     # each element is dependent on its row and column index
-    # element wise -> col_idx * cosine(row_idx)
-    mat = np.fromfunction(lambda x, y: y*np.cos(x), mat_size, dtype=float)
+    # element wise ->  row_idx * cosine(col_idx)
+    mat = np.fromfunction(lambda x, y : x*np.cos(y), mat_size, dtype=float)
+    # replace 0 value with 0.1
+    #mat = np.where(mat==0., 0.1, mat) 
     return mat
 
 
