@@ -1,6 +1,7 @@
 import numpy as np
+import math
 from sklearn import preprocessing
-from ..helpers.MatrixTypes import MatrixTypes
+from helpers.MatrixTypes import MatrixTypes
 
 def independent_mat(mat_size:list):
     # generate matrix with random values between 0 and 1
@@ -14,24 +15,26 @@ def zero_mean_mat(mat_size:list):
     mat = preprocessing.scale(mat, with_mean=True, with_std=False)
     return mat
     
-def partially_independent_mat(mat_size:list):
-    # TODO
+def function_as_mat(mat_size:list):
+    # each element is dependent on its row and column index
+    # element wise -> col_idx * cosine(row_idx)
+    mat = np.fromfunction(lambda x, y: y*np.cos(x), mat_size, dtype=float)
+    return mat
+
 
 def get_matrix(mat_size:list, mat_type:MatrixTypes):
     if mat_type == MatrixTypes.INDEPENDENT:
         return independent_mat(mat_size)
     elif mat_type == MatrixTypes.ZERO_MEAN:
         return zero_mean_mat(mat_size)
-    elif mat_type == MatrixTypes.PARTIALLY_INDEPENDENT:
-        return partially_independent_mat(mat_size)
+    elif mat_type == MatrixTypes.FUNCTION_AS_MATRIX:
+        return function_as_mat(mat_size)
     elif mat_type == MatrixTypes.INDEPENDENT_CORR:
-        mat = independent_correlation_mat(mat_size)
-        return np.corrcoef(mat)
-    elif mat_type == MatrixTypes.ZERO_MEAN_CORR:
-        mat = zero_mean_correlation_mat(mat_size)
+        mat = independent_mat(mat_size)
         return np.corrcoef(mat)
     else:
-        mat = partially_independent_correlation_mat(mat_size)
+        mat = zero_mean_mat(mat_size)
         return np.corrcoef(mat)
+
 
     
