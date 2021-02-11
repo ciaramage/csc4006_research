@@ -33,7 +33,7 @@ def FCSA_analysis( X, Nc=1): # Nc default to 1 if not defined in function call
     #
     Y = X
     Y_star = X.T
-    TR = np.trace( np.matmul(Y, Y_star))
+    TR = np.trace( Y_star.dot(Y))
     #
     # initialize storage variables
     #
@@ -54,31 +54,32 @@ def FCSA_analysis( X, Nc=1): # Nc default to 1 if not defined in function call
             # x and x'
             #
             x = Y[:,i];# column i
-            x_star = x.conjugate().T
-     
-            #
+            x_star = np.atleast_2d(x)
+            x = x_star.T
             # rayleigh quotient for x[i]
             #
-            rQ[i] = (x_star.dot(Y_star.dot(x))) / (x_star.dot(x))
+            r = Y_star @ x
+            r_star = r.conjugate().T
+            rQ[i] = (r_star.dot(r)) / (x_star.dot(x)) 
+ 
         #
         # select index of max rQ
         #
-        print(rQ.shape)
         idx = np.argmax(rQ)
         #
-        #accumulated variance explained
-        #
-        VEX = VEX + 100*v/TR  # 100*v/TR = variance explained by selected component
+        # variance explained
+        v = Y[:,idx]
+        # accumulated variance explained
+        VEX += 100*v/TR  # 100*v/TR = variance explained by selected component
 
         #
         # deflate matrix
         #
         x = Y[:,idx]
-        x = np.atleast_2d(x)
-        print(x.shape)
+        x = np.atleast_2d(x).T
         
         # theta
-        th = np.matmul(Y, np.linalg.pinv(x))
+        th = np.linalg.pinv(x) @ Y
 
         Yhat = x.dot(th)
         Y = Y-Yhat
@@ -86,12 +87,11 @@ def FCSA_analysis( X, Nc=1): # Nc default to 1 if not defined in function call
         # store results
         S.append(x)
         M.append(th.T)
-        YhatP = YhatP + Yhat
         compID.append(idx)
         VarEx.append(VEX)
 
     return S, M, VarEx, compID
 
-def do_fsca(X):
-    return FCSA_analysis(X,1)  
+def do_fsca(X, Nc=1):
+    return FCSA_analysis(X,Nc)  
 

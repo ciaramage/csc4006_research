@@ -25,6 +25,7 @@ def opfs(X, Nc=1):
     compID = []
     VarEx = []
     YhatP = 0
+    VEX = 0
     S = []
     M = []
     #
@@ -42,21 +43,20 @@ def opfs(X, Nc=1):
             x_star = x.T
             
             EFS[i] = (x_star.dot(t1)**2) / (x_star.dot(x) + np.finfo(float).eps)
+        
         # 
-        # select index of max efs
+        # select variable most correlated with first principle component
         #
         idx = np.argmax(EFS)
         #
         # deflate matrix
         #
         x = Y[:,idx]
-        x = np.atleast_2d(x)
-        x = x.T
+        x = np.atleast_2d(x).T
         # theta
         th = np.linalg.pinv(x) @ Y
-        Yhat = x.dot(th)
+        Yhat = x @ th
         Y = Y-Yhat
-
         # 
         # store results
         #
@@ -64,10 +64,9 @@ def opfs(X, Nc=1):
         M.append(th.T)
         YhatP = YhatP + Yhat
         compID.append(idx)
-        print('VT')
-        print(VT)
-        VarEx.append(np.var(np.divide(YhatP, VT*100)))
-    
+        VEX += np.var(YhatP) /VT * 100
+        VarEx.append(VEX) # accumulated variance explained
+
     # return S, M, VarEx, compId
     return S, M, VarEx, compID
     

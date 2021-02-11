@@ -11,18 +11,19 @@ def main():
 
     start_time = time.time()
     
-    mat = get_matrix((5,10), MatrixTypes.FUNCTION_AS_MATRIX)
+    mat = get_matrix((10,30), MatrixTypes.INDEPENDENT)
 
 
-    S, M, VarEx, compId = do_opfs(mat)
-    print(S)
-    print(M)
+    S, M, VarEx, compId = do_opfs(mat, 2)
+    #print(S)
+    #print(M)
+    print('var ex')
     print(VarEx)
     print(compId)
       
     duration = time.time() - start_time
     #print(results)
-    print(duration)
+    #print(duration)
     
 
 
