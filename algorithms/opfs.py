@@ -10,15 +10,13 @@ def opfs(X, Nc=1):
         # columns do not have zero mean then fix
         print("\nWarning: Data not zero mean... detrending\n")
         X = X- np.ones(X.shape)*mX 
-    
     #
     # size of matrix (m - measurements, v - variables)
     #
     (m,v) = X.shape 
     L = v # l is number of variables (columns)
     Y = X
-    VT=Y.var(axis=0) # Y is column vector containing variance for each column
-
+    VT= np.var(Y.flatten('F')) # Y is  column vector containing variance for each column
     #
     # initialize storage variables
     #
@@ -27,47 +25,46 @@ def opfs(X, Nc=1):
     YhatP = 0
     VEX = 0
     S = []
-    M = []
+    M = [
     #
     # initialise storage for correlation vector
     #
     EFS=np.zeros((L,1))  # eigen factors
 
     for j in range(0,Nc):
-        
         # calculate scores of 1st pc for Y using nipals algorithm
-        t1, num_iterations  = pca_nipals(Y)
-
+        t1, num_iterations  = pca_nipals(Y)s
         for i in range(0,L):
             x = Y[:,i] # column i
-            x_star = x.T
-            
-            EFS[i] = (x_star.dot(t1)**2) / (x_star.dot(x) + np.finfo(float).eps)
-        
+            x = NP.atleast_2d(x).T
+
+            EFS[i] = np.divide( np.matmul(x.T, t1**2), np.matmul(x.T,x) + np.finfo(float).eps)
         # 
         # select variable most correlated with first principle component
         #
-        idx = np.argmax(EFS)
+        idx = np.argmax(EFS) # index of variable with max EFS
+        v =EFS[idx] # value of variable of max EFS
         #
         # deflate matrix
         #
-        x = Y[:,idx]
+        x = Y[:,id]
         x = np.atleast_2d(x).T
-        # theta
-        th = np.linalg.pinv(x) @ Y
-        Yhat = x @ th
+        th = np.matmul(np.linalg.pinv(x),Y)
+        Yhat = np.matmul(x, th)
         Y = Y-Yhat
+        #
+        # variance explained
+        #
+        YhatP = np.add(YhatP, Yhat)
+        VEX+= np.divide( np.var(YhatP.flatten('F')), VT) *100
         # 
         # store results
         #
+         # store results
         S.append(x)
         M.append(th.T)
-        YhatP = YhatP + Yhat
-        compID.append(idx)
-        VEX += np.var(YhatP) /VT * 100
-        VarEx.append(VEX) # accumulated variance explained
-
-    # return S, M, VarEx, compId
+        compID.append(id)
+        VarEx.append(VEX)
     return S, M, VarEx, compID
     
 def do_opfs(X, Nc=1):
