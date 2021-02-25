@@ -56,5 +56,8 @@ def Lazy_Greedy_FSCA_analysis(X, Nc=1):
     # convert rQ to variance explained
     #
     VEX = np.divide(100*v, TR)
-
+    #
+    # VEX -> order by descending, max > min
+    #
+    VEX = sorted(VEX, reverse=True)
     
