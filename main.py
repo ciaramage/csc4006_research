@@ -14,16 +14,17 @@ def main():
     mat = get_matrix((10,30), MatrixTypes.INDEPENDENT)
 
 
-    S, M, VarEx, compId = do_opfs(mat, 2)
+    S, M, VarEx, compId = do_fsca(mat, 2)
     #print(S)
     #print(M)
-    print('var ex')
+    print('variance explained')
     print(VarEx)
+    print('component id')
     print(compId)
       
     duration = time.time() - start_time
-    #print(results)
-    #print(duration)
+    print('duration')
+    print(duration)
     
 
 
