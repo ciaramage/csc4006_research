@@ -66,7 +66,7 @@ def FCSA_analysis( X, Nc=1): # Nc default to 1 if not defined in function call
         #
         x = Y[:,idx]
         x = np.atleast_2d(x).T
-        th = no.matmul(np.linalg.pinv(x),Y)
+        th = np.matmul(np.linalg.pinv(x),Y)
         Yhat = np.matmul(x, th)
         Y = Y-Yhat
         #
