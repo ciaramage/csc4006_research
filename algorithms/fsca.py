@@ -18,28 +18,23 @@ def FCSA_analysis( X, Nc=1): # Nc default to 1 if not defined in function call
         # columns do not have zero mean then fix
         print("\nWarning: Data not zero mean... detrending\n")
         X = X- np.ones(X.shape)*mX
-
     #
     # size of matrix (m - measurements, v - variables)
     #
-
     m= X.shape[0] 
     v= X.shape[1]
-    print(m)
-    print(v)
     L = v # l is number of variables (columns)
     #
     # sum of matrix diagonal
     #
     Y = X
     Y_star = X.T
-    TR = np.trace( Y_star.dot(Y))
+    TR = np.trace( np.matmul(Y_star, Y))
     #
     # initialize storage variables
     #
     compID = []
     VarEx = []
-    YhatP = 0
     S = []
     M = []
     VEX = 0
@@ -49,49 +44,39 @@ def FCSA_analysis( X, Nc=1): # Nc default to 1 if not defined in function call
     rQ= np.zeros((L,1)) 
 
     for j in range(0,Nc):
-        for i in range(0,L):
-            #
-            # x and x'
-            #
-            x = Y[:,i];# column i
-            x_star = np.atleast_2d(x)
-            x = x_star.T
+        for i in range(0,L):       
+            x = Y[:,i]; # column i
+            x = np.atleast_2d(x).T
             # rayleigh quotient for x[i]
             #
-            r = Y_star @ x
-            r_star = r.conjugate().T
-            rQ[i] = (r_star.dot(r)) / (x_star.dot(x)) 
- 
+            r = np.matmul(Y.T, x)
+            rQ[i] = (np.matmul(r.T, np.divide(r, np.matmul(x.T, x)))) 
         #
         # select index of max rQ
         #
-        idx = np.argmax(rQ)
+        idx = np.nanargmax(rQ)
+        v= rQ[idx]
         #
-        # variance explained
-        v = Y[:,idx]
         # accumulated variance explained
-        VEX += 100*v/TR  # 100*v/TR = variance explained by selected component
-
+        #
+        vex = VEX + np.divide(100*v, TR)
+        VEX = vex[0]  # 100*v/TR = variance explained by selected component
         #
         # deflate matrix
         #
         x = Y[:,idx]
         x = np.atleast_2d(x).T
-        
-        # theta
-        th = np.linalg.pinv(x) @ Y
-
-        Yhat = x.dot(th)
+        th = no.matmul(np.linalg.pinv(x),Y)
+        Yhat = np.matmul(x, th)
         Y = Y-Yhat
-
+        #
         # store results
+        #
         S.append(x)
         M.append(th.T)
-        compID.append(idx)
+        compID.append(idx+1) # component idx reflects matlab indexing from 1
         VarEx.append(VEX)
-
     return S, M, VarEx, compID
 
 def do_fsca(X, Nc=1):
     return FCSA_analysis(X,Nc)  
-
