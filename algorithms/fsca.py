@@ -28,8 +28,7 @@ def FCSA_analysis( X, Nc=1): # Nc default to 1 if not defined in function call
     # sum of matrix diagonal
     #
     Y = X
-    Y_star = X.T
-    TR = np.trace( np.matmul(Y_star, Y))
+    TR = np.trace( np.matmul(Y.T, Y))
     #
     # initialize storage variables
     #

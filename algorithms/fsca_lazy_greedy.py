@@ -44,4 +44,17 @@ def Lazy_Greedy_FSCA_analysis(X, Nc=1):
     # initialize storage for rayleigh quotient
     #
     rQ = np.zeros((L,1))
+
+    # first rayleigh quotient
+    for i in range(0,L):
+        x = Y[:,i] # column i
+        x = np.atleast_2d(x).T
+        # rayleigh quotient for x[i]
+        r = np.matmul(Y.T, x)
+        rQ[i] = (np.matmul(r.Y, np.divide(r, np.matmul(x.T, x))))
+    #
+    # convert rQ to variance explained
+    #
+    VEX = np.divide(100*v, TR)
+
     
