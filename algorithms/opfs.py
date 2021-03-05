@@ -25,7 +25,7 @@ def opfs(X, Nc=1):
     YhatP = 0
     VEX = 0
     S = []
-    M = [
+    M = []
     #
     # initialise storage for correlation vector
     #
@@ -33,21 +33,21 @@ def opfs(X, Nc=1):
 
     for j in range(0,Nc):
         # calculate scores of 1st pc for Y using nipals algorithm
-        t1, num_iterations  = pca_nipals(Y)s
+        t1, num_iterations  = pca_nipals(Y)
         for i in range(0,L):
             x = Y[:,i] # column i
-            x = NP.atleast_2d(x).T
+            x = np.atleast_2d(x).T
 
             EFS[i] = np.divide( np.matmul(x.T, t1**2), np.matmul(x.T,x) + np.finfo(float).eps)
         # 
         # select variable most correlated with first principle component
         #
-        idx = np.argmax(EFS) # index of variable with max EFS
+        idx = np.nanargmax(EFS) # index of variable with max EFS
         v =EFS[idx] # value of variable of max EFS
         #
         # deflate matrix
         #
-        x = Y[:,id]
+        x = Y[:,idx]
         x = np.atleast_2d(x).T
         th = np.matmul(np.linalg.pinv(x),Y)
         Yhat = np.matmul(x, th)
@@ -60,10 +60,9 @@ def opfs(X, Nc=1):
         # 
         # store results
         #
-         # store results
         S.append(x)
         M.append(th.T)
-        compID.append(id)
+        compID.append(idx)
         VarEx.append(VEX)
     return S, M, VarEx, compID
     
