@@ -7,7 +7,7 @@ import numpy as np
 # idx2: index
 def gram_schmidt(mat, idx1, idx2):    
     # matrix containing the columns specified by the (starting column) idx1 and (ending column - inclusive) idx2
-    A = mat[:,idx1:idx2+1]
+    A = mat[:,idx1:idx2]
     Q, R = qr(A)
-    return Q, R
+    return Q
 
