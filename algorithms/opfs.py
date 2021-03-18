@@ -1,7 +1,7 @@
 import numpy as np 
 from sklearn import preprocessing
 from numpy.linalg import eigh
-from helpers.algorithms.pca import pca_nipals
+from helpers.algorithms.pca import pca_first_nipals
 
 def opfs(X, Nc=1):
     # matrix x needs to have zero mean columns - they should by default in matrix_generator but check anyway
@@ -33,7 +33,8 @@ def opfs(X, Nc=1):
 
     for j in range(0,Nc):
         # calculate scores of 1st pc for Y using nipals algorithm
-        t1, num_iterations  = pca_nipals(Y)
+        t1  = pca_first_nipals(Y)
+
         for i in range(0,L):
             x = Y[:,i] # column i
             x = np.atleast_2d(x).T
@@ -43,7 +44,6 @@ def opfs(X, Nc=1):
         # select variable most correlated with first principle component
         #
         idx = np.nanargmax(EFS) # index of variable with max EFS
-        v =EFS[idx] # value of variable of max EFS
         #
         # deflate matrix
         #
@@ -55,8 +55,8 @@ def opfs(X, Nc=1):
         #
         # variance explained
         #
-        YhatP = np.add(YhatP, Yhat)
-        VEX+= np.divide( np.var(YhatP.flatten('F')), VT) *100
+        YhatP = YhatP + Yhat
+        VEX= np.divide( np.var(YhatP.flatten('F')), VT) *100
         # 
         # store results
         #
