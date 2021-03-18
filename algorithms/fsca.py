@@ -10,14 +10,13 @@ from numpy.linalg import eigh
 # Nc is number of FSC components to compute
 
 
-def FCSA_analysis( X, Nc=1): # Nc default to 1 if not defined in function call
-    # matrix x needs to have zero mean columns - they should by default in matrix_generator but check anyway
-    # TODO - Check zero mean columns for matrix
-    mX = X.mean(axis = 0) # calculate mean of X across axis=0 (0 for columns, 1 for rows)
-    if( max(mX) > 10**-6):
-        # columns do not have zero mean then fix
-        print("\nWarning: Data not zero mean... detrending\n")
-        X = X- np.ones(X.shape)*mX
+def FCSA( X, Nc=1): # Nc default to 1 if not defined in function call
+    # matrix needs to have zero mean columns to be mean centred
+    mX = X.mean(axis=1, keepdims=True)
+    if(max(mX) > 10**-6):
+        # column do not mean centered
+        print('\nWarning: Data not zero mean... detrending\n')
+        X = X - mX
     #
     # size of matrix (m - measurements, v - variables)
     #
@@ -28,8 +27,7 @@ def FCSA_analysis( X, Nc=1): # Nc default to 1 if not defined in function call
     # sum of matrix diagonal
     #
     Y = X
-    Y_star = X.T
-    TR = np.trace( np.matmul(Y_star, Y))
+    TR = np.trace( np.matmul(Y.T, Y))
     #
     # initialize storage variables
     #
@@ -45,8 +43,8 @@ def FCSA_analysis( X, Nc=1): # Nc default to 1 if not defined in function call
 
     for j in range(0,Nc):
         for i in range(0,L):       
-            x = Y[:,i]; # column i
-            x = np.atleast_2d(x).T
+            x = np.atleast_2d(Y[:,i]).T # column i
+            #
             # rayleigh quotient for x[i]
             #
             r = np.matmul(Y.T, x)
@@ -79,4 +77,4 @@ def FCSA_analysis( X, Nc=1): # Nc default to 1 if not defined in function call
     return S, M, VarEx, compID
 
 def do_fsca(X, Nc=1):
-    return FCSA_analysis(X,Nc)  
+    return FCSA(X,Nc)  
