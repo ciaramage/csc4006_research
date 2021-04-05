@@ -48,7 +48,7 @@ def FCSA( X, Nc=1): # Nc default to 1 if not defined in function call
             # rayleigh quotient for x[i]
             #
             r = np.matmul(Y.T, x)
-            rQ[i] = (np.matmul(r.T, np.divide(r, np.matmul(x.T, x)))) 
+            rQ[i] = np.matmul(r.T, np.divide(r, np.matmul(x.T, x)))
         #
         # select index of max rQ
         #
