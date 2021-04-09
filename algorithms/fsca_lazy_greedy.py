@@ -3,13 +3,14 @@ import numpy as np
 def lazy_greedy_FSCA(X, Nc=1):
     """FSCA implemented with Minoux's lazy greedy optimization with a 
     priority queue. Avoids reevaluating features with the least correlated raleigh quotient.
+    This optimization uses arrays to implement a 'priority queue'
 
     Args:
         X ([type]): [description]
         Nc (int, optional): [description]. Defaults to 1.
 
     Returns:
-        [type]: [description]
+        [S, M, VarEx, compID]: [description]
     """
     #
     # algorithm required to have zero mean columns
@@ -73,7 +74,6 @@ def lazy_greedy_FSCA(X, Nc=1):
     #
     for j in range(1,Nc):
         currentPos = j # track how far through the list 
-        currentGain = idxs[currentPos] # track how far through the list 
         bestGain = 0
         bestGainIdx = 0
         worstGain = gains[0]

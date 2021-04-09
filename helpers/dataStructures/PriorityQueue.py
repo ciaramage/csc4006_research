@@ -43,11 +43,11 @@ class PriorityQueue():
         raise KeyError("No elements remain in priority queue")
     
     def smallest_item(self):
-        priority, _, item = hq.nsmallest(1, self.priorityQueue)
+        priority, _, item = hq.nsmallest(1, self.priorityQueue)[0]
         return priority, item
     
     def largest_item(self):
-        priority, _, item = hq.nlargest(1, self.priorityQueue)
+        priority, _, item = hq.nlargest(1, self.priorityQueue)[0]
         return priority, item
 
     def nth_largest_item(self, n):
