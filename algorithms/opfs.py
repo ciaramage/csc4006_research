@@ -34,12 +34,15 @@ def opfs(X, Nc=1):
     for j in range(0,Nc):
         # calculate scores of 1st pc for Y using nipals algorithm
         t1  = pca_first_nipals(Y)
-
+        #print('\nt1')
+        #print(t1)
         for i in range(0,L):
             x = Y[:,i] # column i
             x = np.atleast_2d(x).T
 
-            EFS[i] = np.divide( np.matmul(x.T, t1**2), np.matmul(x.T,x) + np.finfo(float).eps)
+            EFS[i] = np.divide( np.square(np.matmul(x.T, t1)), np.matmul(x.T,x) + np.finfo(float).eps)
+        print('\n***EFS')
+        print(EFS)
         # 
         # select variable most correlated with first principle component
         #
@@ -52,6 +55,8 @@ def opfs(X, Nc=1):
         th = np.matmul(np.linalg.pinv(x),Y)
         Yhat = np.matmul(x, th)
         Y = Y-Yhat
+        #print('\n**Y')
+        #print(Y)
         #
         # variance explained
         #
