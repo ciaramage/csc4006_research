@@ -1,141 +1,139 @@
 import math
-import numpy as np 
 import array as arr
-from scipy.linalg import qr
-from sklearn.metrics import r2_score
+import numpy as np
 from helpers.algorithms.gram_schmidt import gram_schmidt
 
-def ufs(X, Nc):
-    # size of matrix X ( m - measurements, v - variables)
-    m, v = X.shape
+def ufs(X, Nc, rSquareMax=0.99):
+    """[summary]
 
-    if(Nc > v):
-        Nc = v
-    
-    # matrix needs to have zero mean columns to be mean centred
+    Args:
+        X ([type]): [description]
+        Nc ([type]): [description]
+        rSquareMax (float, optional): [description]. Defaults to 0.1.
+
+    Returns:
+        [type]: [description]
+    """
+    #
+    # Algorithm requires mean centered columns
+    #
+    m,v = X.shape
     mX = X.mean(axis=1, keepdims=True)
     if(max(mX) > 10**-6):
-        # column do not mean centered
+        # columns not mean centered
         print('\nWarning: Data not zero mean... detrending\n')
         X = X - mX
-    
-    L = v # number of variables
+    #
+    # Setup
+    #
     Y = X.copy()
-    #
-    # initialise storage variables
-    #
-    compID = arr.array('i') # specifiy an array of integers
+
+    # Reject columns with standard deviation < 0
+    stdev_idx = []
+    stdevs = np.std(Y, axis=0) # standard deviation along the columns
+    stdevs_idx = np.where(stdevs < 0)
+    Y = np.delete(Y, stdevs_idx, axis=1)
+    stdevs = np.delete(stdevs, stdevs_idx)
+    cols_idxs = np.arange(0, Y.shape[1]) # used to keep track of column features
+
+    # Normalize remaining components to unit length
+    Y = np.divide(Y, np.atleast_2d(stdevs))
+    # Setup storage variables
+
     S = []
     M = []
-    smallestSquare = []
+    rSquare = []
+    compID = arr.array('i')
+    #
+    # First component
+    #
+    corr_mat = np.corrcoef(np.matmul(Y.T, Y)) # correlation matrix
+    square_corr_mat = np.square(corr_mat) # squared correlation matrix
 
-    #
-    # reject columns whose standard deviation is < 0
-    #
-    stdevs = np.std(Y, axis=1)
-    std_idx = np.where(stdevs < 0)
-    Y = np.delete(Y, std_idx, axis=1)
-    stdevs = np.delete(stdevs, std_idx)
-    #
-    # normalise remaining columns to unit length
-    #
-    Y = np.divide(Y, np.atleast_2d(stdevs).T)
-    #
-    # calculate correlation matrix
-    #
-    corr_mat = np.corrcoef(np.matmul(Y.T, Y))
-    sq_corr_mat = np.square(corr_mat) # square correlation matrix
-    #
-    # smallest squared correlation coefficients in each column of Y
-    # first two columns have the two smallest square correlation coefficient
-    #
-    smallest_sq_corr_mat = []
+    # select as the first two columns those with the smallest squared correlation coefficient
+    # and reject columns whose squared correlation coefficient with either exceeds rSquareMax
+    smallest_sq_corr_mat = [] # smallest squared correlation coefficient in each column
     for i in range(0, Y.shape[1]):
-        x = sq_corr_mat[:,i] # column i
-        idx = np.nanargmin(x)
-        smallest_sq_corr_mat.append(x[idx])   
-    # value in k'th position is in it's sorted position, and values smaller than it go to the left
-    k = np.argpartition(smallest_sq_corr_mat, kth=1)[:2] # k contains the indexes of the 2 smallest square correlation coefficient
-    compID = np.append(compID, k)
-    smallestSquare = np.append(smallestSquare, np.take(smallest_sq_corr_mat, k))
-    S.append(np.take(Y, k))
-    #
-    # calculate coefficient of determination R^2 between selected columns and the remaining columns
-    # find the value of maximum R^2 with each selected column
-    #
-    r2_col1_max, r2_col2_max = coeffecient_determination(compID, Y)
-    #
-    # calculate the square pair wise correlation coefficient with selected columns
-    # reject columns whose coefficient exceeds the R^2 maximum of either of the selected columns
-    #
-    pc_col1, pc_col2 = pairwise_coefficient(compID, Y)
-    idx_reject = np.where((pc_col1 > r2_col1_max) | (pc_col2 > r2_col2_max))
-    Y = np.delete(Y, idx_reject, axis=1)
-    #####
-    # LOOP
-    #####
+        x = square_corr_mat[:,i]
+        idx = np.argmin(x)
+        smallest_sq_corr_mat.append(x[idx])
 
-    # the first two components/columns have already been selected
-    for i in range( 2, Nc): 
-        #
-        # choose an orthonormal basis for the subspace R^P spanned by the selected columns - indexes of which stored in compID
-        # Q is a matrix whose columns are orthonormal
-        #
-        Q = gram_schmidt(Y, compID)
-        #
-        # project each remaining column of Y onto the subspace spanned by the selected columns
-        # which is calculated by the gram_schmidt function
-        #
+    # the two smallest values in smallest_sq_corr_mat are used to select the first two components
+    k = np.argpartition(smallest_sq_corr_mat, kth=1)[:2] # returns the indexes of the 2 smallest square corrcoef
+    compID = np.append(compID, k)
+    rSquare = np.append(rSquare, np.take(smallest_sq_corr_mat, k))
+    for ID in compID:
+        S.append(Y[:,ID]) # each row in S is a column vector
+
+    # find squared pairwise correlation coefficient of each column with each selected column
+    # and reject those > rSquareMax
+    pc1, pc2 = pairwise_coefficient(compID, Y)
+    idxs_reject = np.where((pc1 > rSquareMax) | (pc2 > rSquareMax))[0]
+    Y = np.delete(Y, idxs_reject, axis=1)
+    cols_idxs = np.delete(cols_idxs, idxs_reject)
+
+    #
+    # Loop for remaining components
+    #
+    idxs_to_mask = arr.array('i') # used to mask components already selected from argmin computation
+
+    for i in range(2, Nc): # from 2 as the first two components have already been selected
+        # Find an orthonormal basis and project each remaining column of Y onto the subspace
+        # spanned by the selected columns -> calculated by gram_schmidt function
+        # Rows of S are selected features -> transpose so selected features are represented by the columns
+        Q = gram_schmidt(np.asarray(S).T)
         Rj = np.zeros(Y.shape)
         for j in range(0, Y.shape[1]):
             rj = np.matmul(np.matmul(Q, Q.T), Y[:,j])
             Rj[:,j] = rj
-        #
-        # select the next column as that with the smallest Rj value
-        # append index to compID, and the column data to smallestSquare
-        #
+        
+        # Select as the next feature the column with the smallest Rj value, append its column ID to the data storage variables
         smallest_Rj = []
         for j in range(0, Rj.shape[1]):
             x = Rj[:,j] # column j
-            idx = np.nanargmin(x) # index of the smallest in each column
+            idx = np.argmin(x) # index of the smallest Rj value in each column
             smallest_Rj.append(x[idx])
-        # dont want to include the index of columns already selected
-        # set the value of index for columns already selected equal to nan
-        for j in compID:
-          smallest_Rj[j] = np.nan 
-        ###
-        idx = np.nanargmin(smallest_Rj) # index of the next selected column
-        compID = np.append(compID, idx)
-        smallestSquare = np.append(smallestSquare, smallest_Rj[idx])
-        M.append(Q)
-        S.append(Y[:,idx])
-    return S, M, smallestSquare, compID
-
-
-
-
         
-def coeffecient_determination(cols, mat ):
-  r2_col1 = np.zeros(mat.shape[1])
-  r2_col2 = np.zeros(mat.shape[1])
-  for i in range(0, mat.shape[1]):
-      r2_col1[i] = r2_score(mat[:,cols[0]], mat[:,i])
-      r2_col2[i] = r2_score(mat[:,cols[1]], mat[:,i])
-  r2_col1[cols[0]] = np.nan
-  r2_col2[cols[1]] = np.nan
-  r2_col1_max = np.nanmax(r2_col1)
-  r2_col2_max = np.nanmax(r2_col2)
-  return r2_col1_max, r2_col2_max   
+        # From the smallest Rj of the columns, which column has the smallest value
+        smallest_Rj = np.asarray(smallest_Rj)
+        smallest_Rj[idxs_to_mask] = np.nan
+        idx = np.nanargmin(smallest_Rj) # index of the column with the smallest value in Y
+        next_ID = cols_idxs[idx] # original idx of that column in X -> this is the component ID
+        idxs_to_mask.append(idx)
+
+        # Store results
+        S.append(Y[:,idx])
+        M.append(Q)
+        compID = np.append(compID, next_ID)
+        rSquare = np.append(rSquare, smallest_Rj[idx])
+    return S, M, rSquare, compID
 
 def pairwise_coefficient(cols, mat):
+    """[summary]
+
+    Args:
+        cols ([type]): [description]
+        mat ([type]): [description]
+
+    Returns:
+        [type]: [description]
+    """
     pc_col1 = np.zeros(mat.shape[1])
     pc_col2 = np.zeros(mat.shape[1])
-
     for i in range(0, mat.shape[1]):
-        pc_col1 = np.corrcoef(mat[:, cols[0]],mat[:,i])[0,1]
-        pc_col2 = np.corrcoef(mat[:,1], mat[:,i])[0,1]
-    return pc_col1, pc_col2
+        pc_col1[i] = np.corrcoef(mat[:, cols[0]],mat[:,i])[0][1]
+        pc_col2[i] = np.corrcoef(mat[:, cols[1]], mat[:,i])[0][1]
+    return pc_col1, pc_col2  
 
 
 def do_ufs(X, Nc=1):
-    return ufs(X, Nc)   
+    """[summary]
+
+    Args:
+        X ([type]): [description]
+        Nc (int, optional): [description]. Defaults to 1.
+
+    Returns:
+        [type]: [description]
+    """
+    return ufs(X, Nc)
