@@ -101,7 +101,7 @@ def lazy_greedy_FSCA(X, Nc=1):
                 break # best gain found
             else:
                 currentPos = currentPos+1
-                if currentPos == L:
+                if currentPos == L-1:
                     break
         #
         # deflate matrix for selected feature
@@ -120,7 +120,7 @@ def lazy_greedy_FSCA(X, Nc=1):
         #
         #  resort the list of gains and indexes
         #
-        if currentPos < L:
+        if currentPos < L-1: # last index position is L-1
             while worstGain < gains[currentPos+1]:
                 currentPos = currentPos+1
                 if currentPos == L-1:

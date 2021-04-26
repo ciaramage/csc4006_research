@@ -1,13 +1,16 @@
-# function to compute qr factorization of a matrix
-# for orthogonalization
 from numpy.linalg import qr
-import numpy as np
 
-# idx1: index of first coloumn
-# idx2: index
-def gram_schmidt(mat, cols):    
-    # matrix containing the columns specified by the (starting column) idx1 and (ending column - inclusive) idx2
-    A = mat[:,cols]
-    Q, R = qr(A)
+def gram_schmidt(A):    
+    """ numpy.linalg.qr computes the qr factorization of a matrix
+    The matrix a is factored as q, _m where q is orthonormal and _ is
+    the upper triangular but is not used by this function.
+
+    Args:
+        A (a 2D numpy array representing a matrix): 
+
+    Returns:
+        Q: A matrix whose columns are orthonormal columns
+    """
+    Q, _ = qr(A)
     return Q
 
