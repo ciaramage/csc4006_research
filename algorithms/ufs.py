@@ -4,22 +4,26 @@ import numpy as np
 from helpers.algorithms.gram_schmidt import gram_schmidt
 
 def ufs(X, Nc, rSquareMax=0.99):
-    """[summary]
+    """ This function implements the baseline Unsupervised Feature Selection algorithm
+    with no optimization applied.
 
     Args:
-        X ([type]): [description]
-        Nc ([type]): [description]
-        rSquareMax (float, optional): [description]. Defaults to 0.1.
+        X (A 2D numpy array): The matrix m x v -> m is measurements, v is variables
+        Nc (Int): The number of components to select
+        rSquareMax (float, optional): [description]. Defaults to 0.99.
 
     Returns:
-        [type]: [description]
+        S: The column vectors of each selected feature during each iteration
+        M: The orthonormal basis used during each iteration after the first two components are selected
+        rSquare: The smallest R squared value of each of the selected components
+        compID: The component ID of each of the selected features 
     """
     #
     # Algorithm requires mean centered columns
     #
     m,v = X.shape
     mX = X.mean(axis=1, keepdims=True)
-    if(max(mX) > 10**-6):
+    if max(mX) > 10**-6:
         # columns not mean centered
         print('\nWarning: Data not zero mean... detrending\n')
         X = X - mX
@@ -109,14 +113,16 @@ def ufs(X, Nc, rSquareMax=0.99):
     return S, M, rSquare, compID
 
 def pairwise_coefficient(cols, mat):
-    """[summary]
+    """This function calculates the pairwise correlation coefficient of the first two selected features
+    represented by cols with each of the remaining features represented by mat
 
     Args:
-        cols ([type]): [description]
-        mat ([type]): [description]
+        cols (A 2D numpy array): Represents the first two selected features.
+        mat (A 2D numpy array): Represents the remaining features.
 
     Returns:
-        [type]: [description]
+        pc_col1, pc_col2: The pairwise coefficient of the first (pc_col1) and the second (pc_col2) selected 
+        features with each of the remaining features.
     """
     pc_col1 = np.zeros(mat.shape[1])
     pc_col2 = np.zeros(mat.shape[1])
@@ -127,13 +133,15 @@ def pairwise_coefficient(cols, mat):
 
 
 def do_ufs(X, Nc=1):
-    """[summary]
+    """ This function returns the values calculated in the computation of the 
+    baseline UFS algorithm with no additional optimization applied.
 
     Args:
-        X ([type]): [description]
-        Nc (int, optional): [description]. Defaults to 1.
+        X (A 2D numpy array): Represents the complete dataset from which features are selected
+        Nc (int, optional): The number of components to be selected. Defaults to 1.
 
     Returns:
-        [type]: [description]
+        ufs(X, Nc): The results from performing 
+        Unsupervised Feature Selection on matrix X to select Nc columns
     """
     return ufs(X, Nc)
