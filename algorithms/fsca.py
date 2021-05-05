@@ -72,7 +72,7 @@ def FCSA( X, Nc=1): # Nc default to 1 if not defined in function call
         #
         S.append(x)
         M.append(th.T)
-        compID.append(idx+1) # component idx reflects matlab indexing from 1
+        compID.append(idx) # component idx reflects matlab indexing from 1
         VarEx.append(VEX)
     return S, M, VarEx, compID
 

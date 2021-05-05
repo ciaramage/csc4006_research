@@ -79,7 +79,7 @@ def lazy_greedy_FSCA_PQ(X, Nc=1):
     S.append(x)
     M.append(th.T)
     VarEx.append(gains[0])
-    compID.append(firstCompId+1)  # component idx reflects matlab indexing from 1
+    compID.append(firstCompId)
 
     #
     # loop for the remaining components
@@ -141,7 +141,7 @@ def lazy_greedy_FSCA_PQ(X, Nc=1):
         #
         S.append(x)
         M.append(th.T)
-        compID.append(bestGainIdx + 1)  # component idx reflects matlab indexing from 1
+        compID.append(bestGainIdx) 
         VarEx.append(bestGain.flatten('C')[0] + VarEx[-1])
 
     return S, M, VarEx, compID
