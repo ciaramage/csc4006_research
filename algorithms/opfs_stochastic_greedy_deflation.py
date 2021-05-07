@@ -4,7 +4,7 @@ from helpers.algorithms.pca import pca_first_nipals
 from helpers.algorithms.gram_schmidt import gram_schmidt
 from helpers.algorithms.fold_indices import split_with_replacement, split_without_replacement
 
-def STOCHASTIC_OPFS(X, Nc=1, with_replacement=True, percentage=0):
+def STOCHASTIC_OPFS_DEF(X, Nc=1, with_replacement=True, percentage=0):
 
     #
     #  Setup
@@ -38,13 +38,12 @@ def STOCHASTIC_OPFS(X, Nc=1, with_replacement=True, percentage=0):
         curr_Y = np.take(Y, curr_idxs, axis=0)
 
         if j > 0:
-            # orthogonalization step
-            Q = gram_schmidt(curr_Y[:, compID])
-            Rj = np.zeros(curr_Y.shape)
-            for i in range(0, curr_Y.shape[1]):
-                rj = np.matmul(np.matmul(Q, Q.T), curr_Y[:,i])
-                Rj[:,i] = rj
-                curr_Y = np.subtract(curr_Y, Rj) 
+            # deflation step
+            for ID in compID:
+                x = np.atleast_2d(curr_Y[:,ID]).T
+                th = np.matmul(np.linalg.pinv(x),curr_Y)
+                Yhat = np.matmul(x, th)
+                curr_Y = curr_Y-Yhat
         
         # column vector containing variance for each column
         VT =  VT + np.sum(np.var(curr_Y, axis=0))
@@ -60,7 +59,7 @@ def STOCHASTIC_OPFS(X, Nc=1, with_replacement=True, percentage=0):
         # select variable most correlated with first pc
         EFS[compID] = np.nan
         idx = np.nanargmax(EFS)
-
+        
         # variance explained using matrix deflation
         x = np.atleast_2d(curr_Y[:,idx]).T
         th = np.matmul(np.linalg.pinv(x), curr_Y)
