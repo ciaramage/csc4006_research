@@ -3,15 +3,14 @@ from helpers.algorithms.gram_schmidt import gram_schmidt
 from helpers.algorithms.fold_indices import split_with_replacement, split_without_replacement
 
 def STOCHASTIC_FSCA_DEF( X, Nc, with_replacement, percentage=0):
+    #
+    # Setup
+    #
     # matrix needs to be zero mean
     mX = X.mean(axis=1, keepdims=True)
     if(max(mX) > 10**-6):
         print('\nWarning: Data not zero mean... detrending\n')
         X = X - mX
-
-    #
-    # Setup
-    #
     Y = X.copy()
     #
     # split the data into Nc subsets

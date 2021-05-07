@@ -1,6 +1,5 @@
 import numpy as np 
 from sklearn import preprocessing
-from numpy.linalg import eigh
 from helpers.algorithms.pca import pca_first_nipals
 
 def opfs(X, Nc=1):
@@ -16,7 +15,7 @@ def opfs(X, Nc=1):
     (m,v) = X.shape 
     L = v # l is number of variables (columns)
     Y = X
-    VT= np.var(Y.flatten('F')) # Y is  column vector containing variance for each column
+    VT= np.sum(np.var(Y, axis=0)) # Y is  column vector containing variance for each column
     #
     # initialize storage variables
     #
@@ -41,8 +40,6 @@ def opfs(X, Nc=1):
             x = np.atleast_2d(x).T
 
             EFS[i] = np.divide( np.square(np.matmul(x.T, t1)), np.matmul(x.T,x) + np.finfo(float).eps)
-        print('\n***EFS')
-        print(EFS)
         # 
         # select variable most correlated with first principle component
         #
@@ -61,7 +58,7 @@ def opfs(X, Nc=1):
         # variance explained
         #
         YhatP = YhatP + Yhat
-        VEX= np.divide( np.var(YhatP.flatten('F')), VT) *100
+        VEX= np.divide( np.sum(np.var(YhatP, axis=0)), VT) *100
         # 
         # store results
         #

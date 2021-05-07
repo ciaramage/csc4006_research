@@ -24,7 +24,6 @@ def STOCHASTIC_FSCA_ORT( X, Nc, with_replacement, percentage=0):
     # initialise storage variables
     #
     S = []
-    M = []
     VarEx = []
     compID = []
     TR = 0
@@ -59,7 +58,7 @@ def STOCHASTIC_FSCA_ORT( X, Nc, with_replacement, percentage=0):
         VEX = VEX + vex[0]
 
         # store results
-        S.append(x)
+        S.append(np.asarray(Y[:,idx]))
         compID.append(idx)
         VarEx.append(VEX)
 
