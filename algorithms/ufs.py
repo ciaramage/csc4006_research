@@ -3,14 +3,14 @@ import array as arr
 import numpy as np
 from helpers.algorithms.gram_schmidt import gram_schmidt
 
-def ufs(X, Nc, rSquareMax=0.99):
+def UFS(X, Nc, rSquareMax=0.99):
     """ This function implements the baseline Unsupervised Feature Selection algorithm
     with no optimization applied.
 
     Args:
         X (A 2D numpy array): The matrix m x v -> m is measurements, v is variables
         Nc (Int): The number of components to select
-        rSquareMax (float, optional): [description]. Defaults to 0.99.
+        rSquareMax (float, optional): The maximum coefficient of determination. Defaults to 0.99.
 
     Returns:
         S: The column vectors of each selected feature during each iteration
@@ -130,18 +130,3 @@ def pairwise_coefficient(cols, mat):
         pc_col1[i] = np.corrcoef(mat[:, cols[0]],mat[:,i])[0][1]
         pc_col2[i] = np.corrcoef(mat[:, cols[1]], mat[:,i])[0][1]
     return pc_col1, pc_col2  
-
-
-def do_ufs(X, Nc=1):
-    """ This function returns the values calculated in the computation of the 
-    baseline UFS algorithm with no additional optimization applied.
-
-    Args:
-        X (A 2D numpy array): Represents the complete dataset from which features are selected
-        Nc (int, optional): The number of components to be selected. Defaults to 1.
-
-    Returns:
-        ufs(X, Nc): The results from performing 
-        Unsupervised Feature Selection on matrix X to select Nc columns
-    """
-    return ufs(X, Nc)

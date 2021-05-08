@@ -1,16 +1,24 @@
 import numpy as np
-from sklearn import preprocessing
 from numpy.linalg import eigh 
-# Reference:
-# L. Puggini, S. McLoone, Forward Selection Component Analysis: Algorithms
-# and Applications, IEEE Transactions on Pattern Analysis and Machine Intelligence,
-# Vol. 39(12), pp. 2395-2408, December 2017, DOI: 10.1109/TPAMI.2017.2648792.
+ 
+def FCSA( X, Nc=1): 
+    """ This function implements the baseline Forward Selection Component Analysis algorithm with 
+    no optimization applied.
+    
+    Reference:
+    L. Puggini, S. McLoone, Forward Selection Component Analysis: Algorithms
+    and Applications, IEEE Transactions on Pattern Analysis and Machine Intelligence,
+    Vol. 39(12), pp. 2395-2408, December 2017, DOI: 10.1109/TPAMI.2017.2648792.
+    Args:
+        X (A 2D numppy array): The matrix m x v -> m is measurements, v is variables
+        Nc (int, optional): The number of components to select. Defaults to 1.
 
-# X is a matrix = m x v (measurements x variables)
-# Nc is number of FSC components to compute
-
-
-def FCSA( X, Nc=1): # Nc default to 1 if not defined in function call
+    Returns:
+        S: The column vectors of each selected feature during each iteration
+        M: Used to deflate the matrix at each iteration
+        VarEx: The accumulated variance explained with the inclusion of each selected feature
+        compID: The component ID of each of the selected features 
+    """
     # matrix needs to have zero mean columns to be mean centred
     mX = X.mean(axis=1, keepdims=True)
     if(max(mX) > 10**-6):
@@ -74,7 +82,4 @@ def FCSA( X, Nc=1): # Nc default to 1 if not defined in function call
         M.append(th.T)
         compID.append(idx) # component idx reflects matlab indexing from 1
         VarEx.append(VEX)
-    return S, M, VarEx, compID
-
-def do_fsca(X, Nc=1):
-    return FCSA(X,Nc)  
+    return S, M, VarEx, compID  

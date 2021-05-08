@@ -3,6 +3,19 @@ from sklearn import preprocessing
 from helpers.algorithms.pca import pca_first_nipals
 
 def opfs(X, Nc=1):
+    """This function implements the baseline Orthogonal Principal Feature Selection algorithm
+    with no optimization applied.
+
+    Args:
+        X (A 2D numppy array): The matrix m x v -> m is measurements, v is variables
+        Nc (int, optional): The number of components to select. Defaults to 1.
+
+    Returns:
+        S: The column vectors of each selected feature during each iteration
+        M: Used to deflate the matrix at each iteration
+        VarEx: The accumulated variance explained with the inclusion of each selected feature
+        compID: The component ID of each of the selected features 
+    """
     # matrix x needs to have zero mean columns - they should by default in matrix_generator but check anyway
     mX = X.mean(axis = 0) # calculate mean of X across axis=0 (0 for columns, 1 for rows)
     if( max(mX) > 10**-6):
@@ -41,7 +54,7 @@ def opfs(X, Nc=1):
 
             EFS[i] = np.divide( np.square(np.matmul(x.T, t1)), np.matmul(x.T,x) + np.finfo(float).eps)
         # 
-        # select variable most correlated with first principle component
+        # select variable most correlated with first principal component
         #
         idx = np.nanargmax(EFS) # index of variable with max EFS
         #
@@ -67,6 +80,3 @@ def opfs(X, Nc=1):
         compID.append(idx)
         VarEx.append(VEX)
     return S, M, VarEx, compID
-    
-def do_opfs(X, Nc=1):
-    return opfs(X, Nc)          
