@@ -35,7 +35,7 @@ def STOCHASTIC_FSCA_ORT( X, Nc, with_replacement, percentage=0):
     for j in range(0, Nc):
         # data subset for this iteration
         curr_idxs = subset_idxs[j] # current subset indices
-        curr_Y = np.take(Y, curr_idxs, axis=0) # current subset columns
+        curr_Y = np.take(Y, curr_idxs, axis=0) # current subset data
         TR = TR + np.trace(np.matmul(curr_Y.T, curr_Y))
 
         if j > 0: # if the component is not the first component

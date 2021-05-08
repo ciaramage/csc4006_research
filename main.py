@@ -12,15 +12,15 @@ def main():
     
 
     start_fsca = time.time()
-    S_fsca, M_fsca, varEx_fsca, compID_fsca = do_opfs(mat, Nc)
+    S_fsca, M_fsca, varEx_fsca, compID_fsca = do_ufs(mat, Nc)
     duration_fsca = time.time() - start_fsca
 
     start_fsca1 = time.time()
-    S_fsca1, varEx_fsca1, compID_fsca1 = STOCHASTIC_OPFS(mat, Nc, True, 0.3)
+    S_fsca1, M, varEx_fsca1, compID_fsca1 = do_ufs_lazy_greedy(mat, Nc)
     duration_fsca1 = time.time() - start_fsca1
     
     start_fsca2 = time.time()
-    S_fsca2, varEx_fsca2, compID_fsca2 = STOCHASTIC_OPFS_DEF(mat, Nc, True, 0.3)
+    S_fsca2, varEx_fsca2, compID_fsca2 = STOCHASTIC_UFS(mat, Nc, 0.99, True, 0.3)
     duration_fsca2 = time.time() - start_fsca2
 
 
@@ -58,6 +58,7 @@ if __name__ == "__main__":
         from algorithms.fsca_stochastic_greedy_deflation import STOCHASTIC_FSCA_DEF
         from algorithms.opfs_stochastic_greedy import STOCHASTIC_OPFS   
         from algorithms.opfs_stochastic_greedy_deflation import STOCHASTIC_OPFS_DEF
+        from algorithms.ufs_stochastic_greedy import STOCHASTIC_UFS
     else:
         from .generators.matrix_generator import get_matrix
         from ..helpers.algorithms.pca import pca_nipals
@@ -73,4 +74,5 @@ if __name__ == "__main__":
         from .algorithms.fsca_stochastic_greedy_deflation import STOCHASTIC_FSCA_DEF
         from .algorithms.opfs_stochastic_greedy import STOCHASTIC_OPFS
         from .algorithms.opfs_stochastic_greedy_deflation import STOCHASTIC_OPFS_DEF
+        from .algorithms.ufs_stochastic_greedy import STOCHASTIC_UFS
     main()
