@@ -2,16 +2,20 @@ import numpy as np
 from helpers.dataStructures.PriorityQueue import PriorityQueue
 
 def lazy_greedy_FSCA_PQ(X, Nc=1):
-    """FSCA implemented with Minoux's lazy greedy optimization with a 
-    priority queue. Avoids reevaluating features with the least correlated raleigh quotient.
+    """ This function implements the Forward Selection Component Analysis algorithm with
+    optimisation based on Minoux's lazy greedy optimization with a priority queue. 
+    Avoids reevaluating features with the least correlated rayleigh quotient.
     This optimization uses a heapq to implement a 'priority queue'
 
     Args:
-        X ([type]): [description]
-        Nc (int, optional): [description]. Defaults to 1.
+        X (A 2D numppy array): The matrix m x v -> m is measurements, v is variables
+        Nc (int, optional): The number of components to select. Defaults to 1.
 
     Returns:
-        [S, M, VarEx, compID]: [description]
+        S: The column vectors of each selected feature during each iteration
+        M: Used to deflate the matrix at each iteration
+        VarEx: The accumulated variance explained with the inclusion of each selected feature
+        compID: The component ID of each of the selected features
     """
     #
     # algorithm required to have zero mean columns

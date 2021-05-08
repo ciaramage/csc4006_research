@@ -16,7 +16,7 @@ def FCSA( X, Nc=1):
     Returns:
         S: The column vectors of each selected feature during each iteration
         M: Used to deflate the matrix at each iteration
-        VarEx: The accumulated variance explained withb the inclusion of each selected feature
+        VarEx: The accumulated variance explained with the inclusion of each selected feature
         compID: The component ID of each of the selected features 
     """
     # matrix needs to have zero mean columns to be mean centred

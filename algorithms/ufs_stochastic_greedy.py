@@ -5,6 +5,26 @@ from helpers.algorithms.gram_schmidt import gram_schmidt
 from helpers.algorithms.fold_indices import split_with_replacement, split_without_replacement
 
 def STOCHASTIC_UFS(X, Nc, rSquareMax = 0.99, with_replacement=True, percentage=0.1):
+    """ This function implements the Unsupervised Feature Selection algorithm with
+    Stochastic Greedy (also known as lazier than lazy greedy) optimisation applied.
+    At each iteration a random sample of the original data is taken and is used to 
+    select the next feature. For more than one component, the indices of features selected
+    in previous iterations are used to corthogonalise the features in the current subset using
+    the Gram-Schmidt process.
+
+    Args:
+        X (A 2D numpy array): The matrix m x v -> m is measurements, v is variables
+        Nc (Int): The number of components to select
+        with_replacement (logical boolean, optiona;): Dictates whether random sampling
+            should occur with or without replacement.
+        percentage (int, optional): If random sampling occurs with replacement - this is the percentage
+            of data selected from the original data. Defaults to 0.1
+
+    Returns:
+        S: The column vectors of each selected feature during each iteration
+        VarEx: The accumulated variance explained with the inclusion of each selected feature
+        compID: The component ID of each of the selected features 
+    """
     #
     # Setup
     #
