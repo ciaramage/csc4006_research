@@ -1,7 +1,6 @@
 import numpy as np
-from numpy.linalg import eigh 
  
-def FCSA( X, Nc=1): 
+def FSCA( X, Nc=1): 
     """ This function implements the baseline Forward Selection Component Analysis algorithm with 
     no optimization applied.
     

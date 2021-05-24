@@ -1,4 +1,3 @@
-import math
 import numpy as np
 import array as arr
 from helpers.algorithms.gram_schmidt import gram_schmidt
@@ -107,7 +106,7 @@ def lazy_greedy_UFS(X, Nc, rSquareMax=0.99):
             # worst gain
             if gains[currentPos] > worstGain:
                 worstGain = gains[currentPos]
-                worstGainIdx = idx[currentPos]
+                worstGainIdx = idxs[currentPos]
             
             if bestGain < gains[currentPos+1]:
                 break # best gain found

@@ -2,7 +2,7 @@ import numpy as np
 from sklearn import preprocessing
 from helpers.algorithms.pca import pca_first_nipals
 
-def opfs(X, Nc=1):
+def OPFS(X, Nc=1):
     """This function implements the baseline Orthogonal Principal Feature Selection algorithm
     with no optimization applied.
 
