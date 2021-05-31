@@ -52,7 +52,7 @@ def gramSchmidt_process(A):
     for j in range(v):
         for k in range(j):
             A[:,j] -= np.dot(A[:,k], A[:,j]) * A[:,k]
-        A[:,j] = A[:,j] / np.linalg.norm(A[:,j])
+        A[:,j] = A[:,j] / norm(A[:,j])
     return A
 
 def orthogonal_projection(X, V=None, I=None):
