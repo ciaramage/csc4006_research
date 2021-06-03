@@ -1,11 +1,12 @@
 import numpy as np
 from numpy.linalg import norm
-from scipy.stats import zscore
+from sklearn import preprocessing
 
-def UFS_new(X, Nc):
+def UFS(X, Nc):
     # Normalise matrix columns to have zero mean and unit variance
-    X = zscore(X, ddof=1)
-
+    #X = zscore(X, ddof=1)
+    X = preprocessing.normalize(X, axis=0)
+  
     # Correlation matrix X^T * X
     sq_corr = np.matmul(X.T, X)
     # Select as the first two columns those with the smallest squared correlation coefficient
@@ -38,8 +39,6 @@ def UFS_new(X, Nc):
     # loop for remaining columns
     for i in range(2, Nc):
         R = norm(np.matmul(np.matmul(c, c.T), X[:,col_idxs]), axis=0)
-        print(R.shape)
-
         idx = np.argmin(R)
         v = R[idx]
         compID = np.append(compID, col_idxs[idx])
