@@ -3,3 +3,6 @@ scipy
 matplotlib
 statsmodels
 sklearn
+tabulate
+texttable
+latektable
