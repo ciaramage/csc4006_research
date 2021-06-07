@@ -2,7 +2,21 @@ import numpy as np
 from numpy.linalg import norm
 from sklearn import preprocessing
 
-def UFS_new(X, Nc):
+
+def lazy_greedy_UFS(X, Nc):
+    """ This function implements the Unsupervised Feature Selection algorithm
+    with lazy greedy optimization applied.
+
+    Args:
+        X (A 2D numpy array): The matrix m x v -> m is measurements, v is variables
+        Nc (Int): The number of components to select
+    Returns:
+        S: The column vectors of each selected feature during each iteration
+        M: The orthonormal basis used during each iteration after the first two components are selected
+        rSquare: The smallest R squared value of each of the selected components
+        compID: The component ID of each of the selected features 
+    """
+
     # Normalise matrix columns to have zero mean and unit variance
     X = preprocessing.normalize(X, axis=0) # axis=0 for column wise 
 
@@ -36,70 +50,72 @@ def UFS_new(X, Nc):
     col_idxs = np.delete(col_idxs, c_idxs)
 
     # Lazy greedy part
-    g = np.min(sq_corr, axis=1)[col_idxs] 
-    gIdxs = np.argsort(g)
-    g = g[gIdxs]
-
-    # loop for remaining columns
-    for i in range(2, Nc):
-        # Setup
-        pos = i # keep track of current position in list of gains
+    #################
+    # the smallest square correlation coefficient of the remaining columns
+    g = np.min(sq_corr, axis=1)[col_idxs]
+    # argsort(g) returns the indices that put the correlation coefficient in ascending orer
+    sorted_idx = np.argsort(g)
+    # put gains and corresponding columns indexes in sorted order
+    g = g[sorted_idx]
+    gIdxs = col_idxs[sorted_idx]
+    print(g)
+    print('\n')
+    # Loop for remaining columns
+    for i in range(0, Nc-2):
+        pos = i # keep track of current position in list of gains: g
         bg = g[-1] # best gain
         bgIdx = 0 # best gain index
         wg = 0 # worst gain
         wgIdx = 0 # worst gain index
-
         while True:
-            # find the column represented by the current position in gIdxs
-            id = np.where(np.isin(col_idxs, gIdxs[pos]))[0].item()
-            R = norm(np.matmul(np.matmul(c, c.T), X[:,id]))
+            # find the column represented by the current position in list of gains: g
+            idx = np.where(np.isin(col_idxs, gIdxs[pos]))[0].item()
+            R = norm(np.matmul(c, c.T) * X[:,idx])
             g[pos] = R
 
-            # check best gain bg
+            # check best gain: bg
             if g[pos] < bg:
                 bg = g[pos]
                 bgIdx = gIdxs[pos]
             
-            # check worst gain wg
+            # check worst gain: wg
             if g[pos] > wg:
                 wg = g[pos]
                 wgIdx = gIdxs[pos]
-
-            # evaluate best gain and current position
+            
+            # evaluate best gain and current pos: bg, pos
             if bg < g[pos+1]:
-                break # best gain found
-            else: 
-                pos = pos + 1
-                if pos == len(gIdxs) -1:
-                    break # if position is th elast position
-
+                break # brest gain found
+            else:
+                pos = pos+1
+                if pos == len(gIdxs)-1:
+                    break # position is at the last element
+        
         # append to data storage
-        compID = np.append(compID, col_idxs[min_idx])
-        rSquare = np.append(rSquare, R[min_idx])
+        compID = np.append(compID, bgIdx)
+        rSquare = np.append(rSquare, bg)
 
-        # resort list of gains and indexes
+        # resort the list of gains and indexes
         if pos < len(gIdxs)-1:
             while wg > g[pos+1]:
                 pos = pos + 1
-                if pos == len(gIdxs) -1:
+                if pos == len(gIdxs)-1:
                     break
         newIdxs = np.argsort(g[0:pos].flatten('C'))
-        g[0:pos] = gIdxs[newIdxs]
+        g[0:pos] = g[newIdxs]
         gIdxs[0:pos] = gIdxs[newIdxs]
-        
 
-        # For each remanining column, calculate its squared multiple correlation coefficient
-        # with the selected columns
-        Xj = np.atleast_2d(X[:, col_idxs[min_idx]])
-        ck = Xj - np.matmul(np.matmul(c, c.T), Xj)
+        # for each remaining column, calculate its square multiple correlation coefficient with the selected column
+        Xj = np.atleast_2d(X[:,col_idxs[idx]]).T
+        ck = np.subtract(Xj, np.matmul(np.matmul(c, c.T), Xj))
         ck = np.divide(ck, norm(ck))
-        # Update the orthormal basis for the subspace spanned by the selected columns: c
+
+        # update the orthonormal basis for the subspace spanned by the selected columns: c
         c = np.append(c, ck, axis=1)
-
-
-        
+    
     S = X[:,compID]
     M = c
+    
 
     #return results
     return S, M, rSquare.tolist(), compID.tolist()

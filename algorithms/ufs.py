@@ -3,8 +3,20 @@ from numpy.linalg import norm
 from sklearn import preprocessing
 
 def UFS(X, Nc):
+    """ This function implements the baseline Unsupervised Feature Selection algorithm
+    with no optimization applied.
+
+    Args:
+        X (A 2D numpy array): The matrix m x v -> m is measurements, v is variables
+        Nc (Int): The number of components to select
+    Returns:
+        S: The column vectors of each selected feature during each iteration
+        M: The orthonormal basis used during each iteration after the first two components are selected
+        rSquare: The smallest R squared value of each of the selected components
+        compID: The component ID of each of the selected features 
+    """
+
     # Normalise matrix columns to have zero mean and unit variance
-    #X = zscore(X, ddof=1)
     X = preprocessing.normalize(X, axis=0)
   
     # Correlation matrix X^T * X
