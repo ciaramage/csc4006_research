@@ -1,40 +1,61 @@
 import time
 import numpy as np
-import matplotlib.pyplot as plt
-import heapq as  hq 
-import itertools
+
 
 def main():
+
+    results1 = []
     print("main started")
-
-    Nc = 10
-    mat = np.loadtxt('data/Xpitprops.txt', delimiter=',')
     
+    Nc1=8
+    mat = read_matrix('data/realData/Xpitprops.txt')
+    print('\n4nc ufs')
 
-    start_fsca = time.time()
-    S_fsca, M_fsca, varEx_fsca, compID_fsca = do_ufs(mat, Nc)
-    duration_fsca = time.time() - start_fsca
+    start_ufs = time.time()
+    _, _, varEx_ufs, compID_ufs = UFS(mat, Nc1)
+    duration_ufs = time.time() - start_ufs
+    results1.append(['Baseline UFS new', varEx_ufs, compID_ufs, duration_ufs]) 
 
-    start_fsca1 = time.time()
-    S_fsca1, M, varEx_fsca1, compID_fsca1 = do_ufs_lazy_greedy(mat, Nc)
-    duration_fsca1 = time.time() - start_fsca1
-    
-    start_fsca2 = time.time()
-    S_fsca2, varEx_fsca2, compID_fsca2 = STOCHASTIC_UFS(mat, Nc, 0.99, True, 0.3)
-    duration_fsca2 = time.time() - start_fsca2
+    print('\n4nc lg ufs')
+    start_ufs_lg = time.time()
+    _, _, varEx_ufs_lg, compID_ufs_lg = lazy_greedy_UFS(mat, Nc1)
+    duration_ufs_lg = time.time() - start_ufs_lg
+    results1.append(['Lazy Greedy UFS', varEx_ufs_lg, compID_ufs_lg, duration_ufs_lg])
+
+    print('\n4nc sg ufs')
+    start_ufs_sg = time.time()
+    _, _,rSquare_ufs_sg, compID_ufs_sg = STOCHASTIC_UFS(mat, Nc1)
+    duration_ufs_sg = time.time() - start_ufs_sg
+    results1.append(['Stochastic Greedy UFS', rSquare_ufs_sg, compID_ufs_sg, duration_ufs_sg])
+ 
+
+    for result in results1:
+            print(result)
+            print('\n')
+
+    """ realDataInfo()
+    randomDataInfo()
+    results = [];
+    sizes = [(500,10), (500, 50), (500, 100), (500,150), (500,200), (500,250),(500,300), (500,350), (500,400), (500,450), (500,500)] """
+
+    """for i in range(len(sizes)):
+        mat = get_matrix(sizes[i])
+        write_matrix('data/randomData/t{0}.txt'.format(i+1), mat) """
+
+    """ for i in range(len(sizes)):
+        mat = get_matrix(sizes[i])
+        read_matrix('data/randomData/t{0}.txt'.format(i+1))
+        start = time.time()
+        _,_,VarEx, compID = FSCA(mat, 6)
+        duration= time.time() - start
+        results.append([mat.shape, VarEx, compID, duration])
+        print('\n')
+        print(mat.shape)
+        print(duration) """
 
 
-    print('\n\n')
-    print(varEx_fsca, compID_fsca)
-    print(duration_fsca)
 
-    print('\n\n')
-    print(varEx_fsca1, compID_fsca1)
-    print(duration_fsca1)
 
-    print('\n\n')
-    print(varEx_fsca2, compID_fsca2)
-    print(duration_fsca2)
 
 
 
@@ -44,16 +65,16 @@ if __name__ == "__main__":
         import sys
         from os import path
         sys.path.append(path.dirname(path.abspath(__file__)))
-        from generators.matrix_generator import get_matrix
-        from helpers.algorithms.pca import pca_first_nipals
-        from helpers.MatrixTypes import MatrixTypes
+        from helpers.matrix_in_out import read_matrix, write_matrix
+        from helpers.matrix_generator import get_matrix
+        #from helpers.toLatex import realDataInfo, randomDataInfo
         from helpers.dataStructures.PriorityQueue import PriorityQueue
-        from algorithms.fsca import do_fsca
-        from algorithms.opfs import do_opfs
-        from algorithms.ufs import do_ufs
-        from algorithms.fsca_lazy_greedy import do_lazy_fsca
-        from algorithms.fsca_lazy_greedy_PQ import do_lazy_fsca_pq
-        from algorithms.ufs_lazy_greedy import do_ufs_lazy_greedy
+        from algorithms.fsca import FSCA
+        from algorithms.opfs import OPFS
+        from algorithms.ufs import UFS
+        from algorithms.fsca_lazy_greedy import lazy_greedy_FSCA
+        from algorithms.fsca_lazy_greedy_PQ import lazy_greedy_FSCA_PQ
+        from algorithms.ufs_lazy_greedy import lazy_greedy_UFS
         from algorithms.fsca_stochastic_greedy import STOCHASTIC_FSCA_ORT    
         from algorithms.fsca_stochastic_greedy_deflation import STOCHASTIC_FSCA_DEF
         from algorithms.opfs_stochastic_greedy import STOCHASTIC_OPFS   
@@ -64,12 +85,12 @@ if __name__ == "__main__":
         from ..helpers.algorithms.pca import pca_nipals
         from ..helpers.MatrixTypes import MatrixTypes
         from ..helpers.dataStructures.PriorityQueue import PriorityQueue
-        from .algorithms.ufs import do_ufs
-        from .algorithms.fsca import do_fsca
-        from .algorithms.opfs import do_opfs
-        from .algorithms.fsca_lazy_greedy import do_lazy_fsca
-        from .algorithms.fsca_lazy_greedy_PQ import do_lazy_fsca_pq
-        from .algorithms.ufs_lazy_greedy import do_ufs_lazy_greedy
+        from .algorithms.ufs import UFS
+        from .algorithms.fsca import FSCA
+        from .algorithms.opfs import OPFS
+        from .algorithms.fsca_lazy_greedy import lazy_greedy_FSCA
+        from .algorithms.fsca_lazy_greedy_PQ import lazy_greedy_FSCA_PQ
+        from .algorithms.ufs_lazy_greedy import UFS_new
         from .algorithms.fsca_stochastic_greedy import STOCHASTIC_FSCA_ORT
         from .algorithms.fsca_stochastic_greedy_deflation import STOCHASTIC_FSCA_DEF
         from .algorithms.opfs_stochastic_greedy import STOCHASTIC_OPFS
