@@ -20,7 +20,7 @@ def UFS(X, Nc):
     X = preprocessing.normalize(X, axis=0)
   
     # Correlation matrix X^T * X
-    sq_corr = np.matmul(X.T, X)
+    sq_corr = np.square(np.matmul(X.T, X))
     # Select as the first two columns those with the smallest squared correlation coefficient
     c_idxs = np.argpartition(np.min(sq_corr, axis=1), kth=1)[:2]
 

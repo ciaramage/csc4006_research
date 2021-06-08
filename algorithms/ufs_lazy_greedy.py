@@ -21,7 +21,7 @@ def lazy_greedy_UFS(X, Nc):
     X = preprocessing.normalize(X, axis=0) # axis=0 for column wise 
 
     # Correlation matrix X^T * X
-    sq_corr = np.matmul(X.T, X)
+    sq_corr = np.square(np.matmul(X.T, X))
     # Select as the first two columns those with the smallest squared correlation coefficient
     c_idxs = np.argpartition(np.min(sq_corr, axis=1), kth=1)[:2]
 
@@ -52,7 +52,7 @@ def lazy_greedy_UFS(X, Nc):
     # Lazy greedy part
     #################
     # the smallest square correlation coefficient of the remaining columns
-    g = np.min(sq_corr, axis=1)[col_idxs]
+    g = norm(np.matmul(np.matmul(c, c.T), X[:,col_idxs]), axis=0)
     # argsort(g) returns the indices that put the correlation coefficient in ascending orer
     sorted_idx = np.argsort(g)
     # put gains and corresponding columns indexes in sorted order
