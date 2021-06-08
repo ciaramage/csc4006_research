@@ -1,11 +1,14 @@
+import matplotlib
 from helpers.matrix_in_out import read_matrix
 from texttable import Texttable
 import latextable
+import matplotlib.pyplot as plt
+
 
 def realDataInfo():
     header = ['Dataset', 'm', 'v']
-    file_names = ['X50sites', 'Xpitprops', 'wdbc','qsar', 'adelaideWaves']
-    data_names = ['Wave Sites', 'Pitprops', 'Breast Cancer', 'QSAR', 'Wave Energy Converters']
+    file_names = ['X50sites', 'Xpitprops', 'wdbc','wpbc', 'dryBeans', 'forestFires']
+    data_names = ['Wave Sites', 'Pitprops', 'Breast Cancer Diagnosis', 'Breast Cancer Prognosis', 'Dry Beans', 'Forest Fires']
     
     rows = []
     rows.append(header)
@@ -18,7 +21,7 @@ def realDataInfo():
 
     table = Texttable()
     table.set_cols_align(["c"] * 3)
-    table.set_deco(Texttable.HEADER | Texttable.HLINES)
+    table.set_deco(Texttable.HEADER | Texttable.VLINES)
     table.add_rows(rows)
 
     print('\nLatek Table: ')
@@ -28,7 +31,7 @@ def randomDataInfo():
     header = ['Dataset', 'm', 'v']
     rows = []
     rows.append(header)
-    for i in range(11):
+    for i in range(10):
         mat = read_matrix('data/randomData/t{0}.txt'.format((i+1)))
         m, v = mat.shape
         dataset = 't{0}'.format((i+1))
@@ -37,7 +40,7 @@ def randomDataInfo():
 
     table = Texttable()
     table.set_cols_align(["c"] * 3)
-    table.set_deco(Texttable.HEADER | Texttable.HLINES)
+    table.set_deco(Texttable.HEADER | Texttable.VLINES)
     table.add_rows(rows)
 
     print('\nLatek Table: ')
