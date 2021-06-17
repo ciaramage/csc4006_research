@@ -3,7 +3,7 @@ from numpy.linalg import norm
 from sklearn import preprocessing
 
 
-def lazy_greedy_UFS(X, Nc):
+def ufs_lazy_greedy(X, Nc):
     """ This function implements the Unsupervised Feature Selection algorithm
     with lazy greedy optimization applied.
 
@@ -58,8 +58,7 @@ def lazy_greedy_UFS(X, Nc):
     # put gains and corresponding columns indexes in sorted order
     g = g[sorted_idx]
     gIdxs = col_idxs[sorted_idx]
-    print(g)
-    print('\n')
+
     # Loop for remaining columns
     for i in range(0, Nc-2):
         pos = i # keep track of current position in list of gains: g
@@ -116,7 +115,8 @@ def lazy_greedy_UFS(X, Nc):
     S = X[:,compID]
     M = c
     
-
     #return results
     return S, M, rSquare.tolist(), compID.tolist()
 
+
+    
