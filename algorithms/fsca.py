@@ -1,6 +1,6 @@
 import numpy as np
  
-def FSCA( X, Nc=1): 
+def fsca( X, Nc=1): 
     """ This function implements the baseline Forward Selection Component Analysis algorithm with 
     no optimization applied.
     
@@ -18,67 +18,57 @@ def FSCA( X, Nc=1):
         VarEx: The accumulated variance explained with the inclusion of each selected feature
         compID: The component ID of each of the selected features 
     """
-    # matrix needs to have zero mean columns to be mean centred
-    mX = X.mean(axis=1, keepdims=True)
+    Y = X.copy()
+    # Algorithm requires matrix X to have zero mean columns
+    mX = X.mean(axis=0)
     if(max(mX) > 10**-6):
-        # column do not mean centered
+        # Columns not mean centered
         print('\nWarning: Data not zero mean... detrending\n')
         X = X - mX
-    #
-    # size of matrix (m - measurements, v - variables)
-    #
-    m= X.shape[0] 
-    v= X.shape[1]
-    L = v # l is number of variables (columns)
-    #
-    # sum of matrix diagonal
-    #
-    Y = X
-    TR = np.trace( np.matmul(Y.T, Y))
-    #
-    # initialize storage variables
-    #
-    compID = []
-    VarEx = []
+
+    # Sum of matrix diagonal
+    TR = np.trace( np.matmul(X.T, X))
+    
+    # Initialize storage variables
     S = []
     M = []
+    compID = []
+    VarEx = []
     VEX = 0
-    #
-    # initialize storage for rayleigh quotient values 
-    #
-    rQ= np.zeros((L,1)) 
+    
+    # Keep track of columns not yet selected
+    col_idxs = np.arange(X.shape[1])
+    
+    for _ in range(0, Nc):
 
-    for j in range(0,Nc):
-        for i in range(0,L):       
-            x = np.atleast_2d(Y[:,i]).T # column i
-            #
-            # rayleigh quotient for x[i]
-            #
-            r = np.matmul(Y.T, x)
+        # Initialize storage for rayleigh quotient values 
+        rQ= np.zeros(len(col_idxs))
+
+        for i in range(len(col_idxs)):       
+            # Column i
+            x = np.atleast_2d(X[:,col_idxs[i]]).T 
+            
+            # Rayleigh quotient for column 
+            r = np.matmul(X.T, x)
             rQ[i] = np.matmul(r.T, np.divide(r, np.matmul(x.T, x)))
-        #
-        # select index of max rQ
-        #
+        # Maximise Rayleigh Quotient
         idx = np.nanargmax(rQ)
         v= rQ[idx]
-        #
-        # accumulated variance explained
-        #
-        vex = VEX + np.divide(100*v, TR)
-        VEX = vex[0]  # 100*v/TR = variance explained by selected component
-        #
-        # deflate matrix
-        #
-        x = Y[:,idx]
-        x = np.atleast_2d(x).T
-        th = np.matmul(np.linalg.pinv(x),Y)
+        
+        # Calculate accumulated variance explained
+        VEX = VEX + np.divide(100*v, TR) # 100*v/TR = variance explained by selected component
+        
+        # Deflate matrix X
+        x = np.atleast_2d(X[:,col_idxs[idx]]).T
+        th = np.matmul(np.linalg.pinv(x),X)
         Yhat = np.matmul(x, th)
-        Y = Y-Yhat
-        #
-        # store results
-        #
-        S.append(x)
+        X = X - Yhat
+        
+        # Store results
         M.append(th.T)
-        compID.append(idx) # component idx reflects matlab indexing from 1
+        compID.append(col_idxs[idx])
         VarEx.append(VEX)
+
+        col_idxs = np.delete(col_idxs, idx)
+    S = Y[:,compID]
     return S, M, VarEx, compID  

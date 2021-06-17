@@ -1,8 +1,7 @@
 import numpy as np 
-from sklearn import preprocessing
 from helpers.algorithms.pca import pca_first_nipals
 
-def OPFS(X, Nc=1):
+def opfs(X, Nc=1):
     """This function implements the baseline Orthogonal Principal Feature Selection algorithm
     with no optimization applied.
 
@@ -16,67 +15,61 @@ def OPFS(X, Nc=1):
         VarEx: The accumulated variance explained with the inclusion of each selected feature
         compID: The component ID of each of the selected features 
     """
-    # matrix x needs to have zero mean columns - they should by default in matrix_generator but check anyway
-    mX = X.mean(axis = 0) # calculate mean of X across axis=0 (0 for columns, 1 for rows)
+    Y = X.copy()
+    # Algorithm requires matrix X to have zero mean columns
+    mX = X.mean(axis=0) 
     if( max(mX) > 10**-6):
-        # columns do not have zero mean then fix
+        # Columns not mean centered
         print("\nWarning: Data not zero mean... detrending\n")
-        X = X- np.ones(X.shape)*mX 
-    #
-    # size of matrix (m - measurements, v - variables)
-    #
-    (m,v) = X.shape 
-    L = v # l is number of variables (columns)
-    Y = X
-    VT= np.sum(np.var(Y, axis=0)) # Y is  column vector containing variance for each column
-    #
-    # initialize storage variables
-    #
+        X = X- mX
+        
+    # Number of features (columns) in matrix X
+    L = X.shape[1] 
+
+    # Sum of column variance
+    VT= np.var(Y)
+
+    # Keep track of columns not yet selected
+    col_idxs = np.arange(X.shape[1])
+    
+    # Initialize storage variables
     compID = []
     VarEx = []
     YhatP = 0
     VEX = 0
-    S = []
     M = []
-    #
-    # initialise storage for correlation vector
-    #
-    EFS=np.zeros((L,1))  # eigen factors
+    
+    for _ in range(0,Nc):
+        EFS=np.zeros(len(col_idxs))
+        # Calculate scores of 1st principle component for Y using nipals algorithm
+        t1  = pca_first_nipals(Y[:,col_idxs])
+        for i in range(len(col_idxs)):
+            # Column col_idxs[i]
+            x = np.atleast_2d(Y[:,col_idxs[i]]).T
 
-    for j in range(0,Nc):
-        # calculate scores of 1st pc for Y using nipals algorithm
-        t1  = pca_first_nipals(Y)
-        #print('\nt1')
-        #print(t1)
-        for i in range(0,L):
-            x = Y[:,i] # column i
-            x = np.atleast_2d(x).T
-
+            # Addition of machine float epsilon prevents division by zero
             EFS[i] = np.divide( np.square(np.matmul(x.T, t1)), np.matmul(x.T,x) + np.finfo(float).eps)
-        # 
-        # select variable most correlated with first principal component
-        #
+
+        # Maximise the eigenvectors - the variable most correlated with first principal component
         idx = np.nanargmax(EFS) # index of variable with max EFS
-        #
-        # deflate matrix
-        #
-        x = Y[:,idx]
-        x = np.atleast_2d(x).T
+        x = np.atleast_2d(Y[:,col_idxs[idx]]).T
+
+        # Deflate matrix
         th = np.matmul(np.linalg.pinv(x),Y)
         Yhat = np.matmul(x, th)
         Y = Y-Yhat
-        #print('\n**Y')
-        #print(Y)
-        #
-        # variance explained
-        #
+        
+        # Calculate accumulated variance explained
         YhatP = YhatP + Yhat
-        VEX= np.divide( np.sum(np.var(YhatP, axis=0)), VT) *100
-        # 
-        # store results
-        #
-        S.append(x)
+        VEX= np.divide(np.var(YhatP), VT) *100
+        
+        # Store results
         M.append(th.T)
-        compID.append(idx)
+        compID.append(col_idxs[idx])
         VarEx.append(VEX)
+
+        # Update col_idxs bby removing index of selected feature
+        col_idxs = np.delete(col_idxs, idx)
+
+    S = X[:,compID]
     return S, M, VarEx, compID

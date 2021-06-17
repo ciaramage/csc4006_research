@@ -1,13 +1,13 @@
 import numpy as np
 from numpy.linalg import qr
 
-def fsca_stochastic_greedy_orthogonal( X, Nc, percentage=0.1):
+def fsca_stochastic_greedy_deflation( X, Nc, percentage=0.1):
     """ This function implements the Forward Selection Component Analysis algorithm with
     Stochastic Greedy (also known as lazier than lazy greedy) optimisation applied.
     At each iteration a random sample of the original data is taken and is used to 
     select the next feature. For more than one component, the indices of features selected
-    in previous iterations are used to orthogonalise the features in the current subset using
-    the Gram-Schmidt process.
+    in previous iterations are used to cover the features in the current subset by matrix deflation.
+
     
     Args:
         X (A 2D numpy array): The matrix m x v -> m is measurements, v is variables
@@ -34,7 +34,7 @@ def fsca_stochastic_greedy_orthogonal( X, Nc, percentage=0.1):
     
     def get_sample_idxs():
         return np.random.randint(low = 0, high = X.shape[0], size = sample_size, dtype=int)
-
+        
     # Initialise storage variables
     M = []
     VarEx = []
@@ -48,7 +48,7 @@ def fsca_stochastic_greedy_orthogonal( X, Nc, percentage=0.1):
 
     TR = TR + np.trace(np.matmul(Y.T, Y))
 
-    # Keep track of column indexes not selected
+    # Keep track of columns not selected
     col_idxs = np.arange(X.shape[1])
 
     # Initialise storage for rayleigh quotient values
@@ -73,32 +73,32 @@ def fsca_stochastic_greedy_orthogonal( X, Nc, percentage=0.1):
     compID.append(idx)
     VarEx.append(VEX)
 
-    # Update col_idxs by removing indexes of selected columns
-    col_idxs =np.delete(col_idxs, idx)
+    # Update col_idxs by removing the index of the selected column
+    col_idxs = np.delete(col_idxs, idx)
 
     # Loop for remaining components
-    for i in range(1,Nc):
+    for i in range(1, Nc):
+        # Update Rayleigh Quotient Storage
+        rQ = np.zeros(len(col_idxs))
+
         # Update sample
         idxs = get_sample_idxs()
         Y = np.take(X, idxs, axis=0)
 
         TR = TR + np.trace(np.matmul(Y.T, Y))
 
-        # Orthogonalise the current subset using the already selected columns as a basis
-        Q, _ = qr(Y[:,compID]) # Columns of Q are orthonormal
-        Yj = np.zeros(Y.shape)
-        for j in range(L):
-            yj = np.matmul(np.matmul(Q, Q.T), Y[:,j])
-            Yj[:,j] = yj
-        Y = np.subtract(Y, Yj)
-        M.append(Q)
+        # Perform deflation step using the already selected columns
+        for id in compID:
+            x = np.atleast_2d(Y[:,id]).T
+            th = np.matmul(np.linalg.pinv(x), Y)
+            Yhat = np.matmul(x, th)
+            Y = Y - Yhat
+            M.append(th)
 
-    
         # Calculate the Rayleigh Quotients
-        # Update storage for rayleigh quotient values
-        rQ = np.zeros(len(col_idxs))
+        # Initialise storage for rayleigh quotient values
         for j in range(len(col_idxs)):
-            # Column j
+            # Column i
             x = np.atleast_2d(Y[:,col_idxs[j]]).T
             # Rayleigh quotient for column 
             r = np.matmul(Y.T, x)

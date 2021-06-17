@@ -39,9 +39,8 @@ def split_with_replacement(n_samples, n_split, percentage):
         A list of n_split numpy arrays
     """
     fold_idxs = []
-    idx_range = np.arange(n_samples)
 
-    for i in range(n_split):
+    for _ in range(n_split):
         n =int(n_samples * percentage)
         idxs = np.random.randint(low=0, high=n_samples, size=n, dtype=int)
         fold_idxs.append(np.asarray(idxs))

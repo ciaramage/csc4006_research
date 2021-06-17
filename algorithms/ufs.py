@@ -2,7 +2,7 @@ import numpy as np
 from numpy.linalg import norm
 from sklearn import preprocessing
 
-def UFS(X, Nc):
+def ufs(X, Nc):
     """ This function implements the baseline Unsupervised Feature Selection algorithm
     with no optimization applied.
 
@@ -49,7 +49,7 @@ def UFS(X, Nc):
     col_idxs = np.delete(col_idxs, c_idxs)
 
     # loop for remaining columns
-    for i in range(2, Nc):
+    for _ in range(2, Nc):
         R = norm(np.matmul(np.matmul(c, c.T), X[:,col_idxs]), axis=0)
         idx = np.argmin(R)
         v = R[idx]
