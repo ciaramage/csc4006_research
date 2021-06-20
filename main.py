@@ -11,73 +11,34 @@ def main():
     """"     sizes = [(500, 50), (500, 100), (500,150), (500,200), (500,250),(500,300), (500,350), (500,400), (500,450), (500,500)]
     
     for i in range(len(sizes)): """
-    results1 = []
-    mat = read_matrix('data/realData/X50sites.txt')
+    results = []
+    mat = read_matrix('data/realData/forestFires.txt')
 
-    start_ufs = time.time()
-    _, _, varEx_ufs, compID_ufs = ufs(mat, Nc1)
+    start_fsca = time.time()
+    _, _, varEx_fsca, compID_fsca = UFS(mat, Nc)
+    duration_fsca = time.time() - start_fsca
+    results.append(['ufs', varEx_fsca, compID_fsca, duration_fsca])
+
+    for result in results:
+        print(result)
+    
+    get_random_duration()
+
+    """ start_ufs = time.time()
+    _, _, varEx_ufs, compID_ufs = lazy_greedy_UFS(mat, 8)
     duration_ufs = time.time() - start_ufs
-    results1.append(['UFS', varEx_ufs, compID_ufs, duration_ufs]) 
+    results.append(['ufs lg', varEx_ufs, compID_ufs, duration_ufs])
 
-    print('\n4nc lg ufs')
-    start_ufs_lg = time.time()
-    _, _, varEx_ufs_lg, compID_ufs_lg = ufs_lazy_greedy(mat, Nc1)
-    duration_ufs_lg = time.time() - start_ufs_lg
-    results1.append(['OPFS SG DEF', varEx_ufs_lg, compID_ufs_lg, duration_ufs_lg])
-
-    print('\n4nc sg ufs')
-    start_ufs_sg = time.time()
-    _, _, rSquare_ufs_sg, compID_ufs_sg = ufs_stochastic_greedy(mat, Nc1, 0.4)
-    duration_ufs_sg = time.time() - start_ufs_sg
-    results1.append(['OPFS SG DEF OLD', rSquare_ufs_sg, compID_ufs_sg, duration_ufs_sg])
-
-    """ print('\n4nc sg ufs')
-    start_ufs_sg1 = time.time()
-    _, _,rSquare_ufs_sg1, compID_ufs_sg1 = stochastic_ufs(mat, Nc1, 0.1)
-    duration_ufs_sg1 = time.time() - start_ufs_sg1
-    results1.append(['FSCA SG ORT', rSquare_ufs_sg1, compID_ufs_sg1, duration_ufs_sg1]) """
- 
-
-    for result in results1:
-            print(result)
-            print('\n')
-
-    """ realDataInfo()
-    randomDataInfo()
-    results = [];
-    sizes = [(500,10), (500, 50), (500, 100), (500,150), (500,200), (500,250),(500,300), (500,350), (500,400), (500,450), (500,500)] """
-
-    """for i in range(len(sizes)):
-        mat = get_matrix(sizes[i])
-        write_matrix('data/randomData/t{0}.txt'.format(i+1), mat) """
+    start_fsca_lg = time.time()
+    _,_, varEx_fsca_lg, compID_fsca_lg = stochastic_ufs(mat, 8, 0.3)
+    duration_fsca_lg = time.time() - start_fsca_lg
+    results.append(['ufs sg', varEx_fsca_lg, compID_fsca_lg, duration_fsca_lg]) """
 
     """ for i in range(len(sizes)):
         mat = get_matrix(sizes[i])
         write_matrix('data/randomData/t{0}.txt'.format(i+1), mat)
 
     randomDataInfo() """
-    
-    """     results1 = []
-    print('\n4nc fsca')
-    
-
-    print('\n4nc ufs')
-    
-
-    print('\n4nc lg fsca')
-     """
-
-    """ results = [];
-    sizes = [(500, 50), (500, 100), (500,150), (500,200), (500,250),(500,300), (500,350), (500,400), (500,450), (500,500)]"""
-
-
-    """  print('\n\n')
-    print(varEx_fsca, compID_fsca)
-    print(duration_fsca)
-
-    print('\n\n')
-    print(varEx_fsca2, compID_fsca2)
-    print(duration_fsca2) """
 
 if __name__ == "__main__":
     if __package__ is None:
