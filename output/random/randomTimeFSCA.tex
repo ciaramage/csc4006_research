@@ -1,0 +1,88 @@
+% This file was created by tikzplotlib v0.9.9.
+\begin{tikzpicture}
+
+\definecolor{color0}{rgb}{0.12156862745098,0.466666666666667,0.705882352941177}
+\definecolor{color1}{rgb}{1,0.498039215686275,0.0549019607843137}
+\definecolor{color2}{rgb}{0.172549019607843,0.627450980392157,0.172549019607843}
+\definecolor{color3}{rgb}{0.83921568627451,0.152941176470588,0.156862745098039}
+
+\begin{axis}[
+legend cell align={left},
+legend style={
+  fill opacity=0.8,
+  draw opacity=1,
+  text opacity=1,
+  at={(0.03,0.97)},
+  anchor=north west,
+  draw=white!80!black
+},
+tick align=outside,
+tick pos=left,
+x grid style={white!69.0196078431373!black},
+xlabel={Number of Columns},
+xmin=27.5, xmax=522.5,
+xtick style={color=black},
+y grid style={white!69.0196078431373!black},
+ylabel={Duration(s)},
+ymin=-0.02486235, ymax=0.66770535,
+ytick style={color=black}
+]
+\addplot [semithick, color0]
+table {%
+50 0.023801
+100 0.059813
+150 0.071753
+200 0.096153
+250 0.122394
+300 0.154953
+350 0.195646
+400 0.233822
+450 0.277696
+500 0.279822
+};
+\addlegendentry{FSCA}
+\addplot [semithick, color1]
+table {%
+50 0.006618
+100 0.013246
+150 0.016536
+200 0.022111
+250 0.030194
+300 0.03544
+350 0.047901
+400 0.047441
+450 0.054755
+500 0.065426
+};
+\addlegendentry{LG-FSCA}
+\addplot [semithick, color2]
+table {%
+50 0.060559
+100 0.123991
+150 0.178628
+200 0.236843
+250 0.299853
+300 0.369387
+350 0.445888
+400 0.52809
+450 0.571826
+500 0.636225
+};
+\addlegendentry{SGO-FSCA}
+\addplot [semithick, color3]
+table {%
+50 0.023804
+100 0.043434
+150 0.065465
+200 0.087117
+250 0.109154
+300 0.145086
+350 0.171578
+400 0.20824
+450 0.212037
+500 0.23734
+};
+\addlegendentry{SGD-FSCA}
+\end{axis}
+
+\end{tikzpicture}
