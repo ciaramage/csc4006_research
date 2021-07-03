@@ -1,8 +1,8 @@
 import numpy as np 
-from helpers.algorithms.pca import pca_first_nipals
+from helpers.pca import pca_first_nipals
 from numpy.linalg import qr
 
-def opfs_stochastic_greedy_orthogonal(X, Nc=1, percentage=0.1):
+def opfs_stochastic_greedy_orthogonal(X, Nc=1, percentage=0.5):
     """This function implements the Orthogonal Principal Feature Selection algorithm with
     Stochastic Greedy (also known as lazier than lazy greedy) optimisation applied.
     At each iteration a random sample of the original data is taken and is used to 
@@ -14,7 +14,7 @@ def opfs_stochastic_greedy_orthogonal(X, Nc=1, percentage=0.1):
         X (A 2D numpy array): The matrix m x v -> m is measurements, v is variables
         Nc (Int): The number of components to select
         percentage (int, optional): If random sampling occurs with replacement - this is the percentage
-            of data selected from the original data. Defaults to 0.1
+            of data selected from the original data. Defaults to 0.5
 
     Returns:
         S: The column vectors of each selected feature during each iteration
@@ -45,7 +45,6 @@ def opfs_stochastic_greedy_orthogonal(X, Nc=1, percentage=0.1):
     compID = []
     VEX = 0
     VT = 0
-    YhatP = 0
 
     # Keep track of olumns not yet selected
     col_idxs = np.arange(X.shape[1])
@@ -77,7 +76,6 @@ def opfs_stochastic_greedy_orthogonal(X, Nc=1, percentage=0.1):
     # Variance explained using matrix deflation
     th = np.matmul(np.linalg.pinv(x), Y)
     Yhat = np.matmul(x, th)
-    YhatP =  YhatP + Yhat
 
     # Accumulated variance explained
     VEX = VEX + np.divide(np.var(Yhat), VT) * 100
@@ -109,7 +107,7 @@ def opfs_stochastic_greedy_orthogonal(X, Nc=1, percentage=0.1):
         # Column vector containing variance for each column
         VT = VT + np.var(Y)
 
-        # Calculate scores of 1st pc for curr_Y using nipals algorithm
+        # Calculate scores of 1st pc for remaining columns using nipals algorithm
         t1 = pca_first_nipals(Y[:,col_idxs])
 
         # Maximise efs

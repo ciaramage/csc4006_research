@@ -2,7 +2,7 @@ import numpy as np
 from numpy.linalg import norm
 from sklearn import preprocessing
 
-def ufs_stochastic_greedy(X, Nc, percentage=0.1):
+def ufs_stochastic_greedy(X, Nc, percentage=0.5):
     """This function implements Unsupervised Feature Selection algorithm with
     Stochastic Greedy (also known as lazier than lazy greedy) optimisation applied.
     At each iteration a random sample of the original data is taken and is used to 
@@ -13,7 +13,7 @@ def ufs_stochastic_greedy(X, Nc, percentage=0.1):
     Args:
         X (A 2D numpy array): The matrix m x v -> m is measurements, v is variables
         Nc (Int): The number of components to select
-        percentage (int, optional): The percentage of data selected from the original data. Defaults to 0.1
+        percentage (int, optional): The percentage of data selected from the original data. Defaults to 0.5
 
     Returns:
         S: The column vectors of each selected feature during each iteration
@@ -57,12 +57,7 @@ def ufs_stochastic_greedy(X, Nc, percentage=0.1):
         # Choose an orthonormal basis c = {c1,c2} for the subspace of R^P spanned by the first two columns
         # if the first two columns are Xa and Xb
         # c1 = Xa, and c2 = Z/|Z| - where Z = Xa - (Xb*Xa)*Xa
-        """ c1 = np.atleast_2d(Y[:,c_idxs[0]]).T
-        Xb = np.atleast_2d(Y[:,c_idxs[1]]).T
-        c2 = np.subtract(c1, np.dot(c1.T, Xb)*c1)
-        c2 = np.divide(c2, norm(c2))
-        c = np.append(c1, c2, axis=1) """
-        c = get_c(Y, c_idxs)
+        c = get_c(Y, compID)
 
         # If > 2 components have already been selected
         if len(compID) > 2:

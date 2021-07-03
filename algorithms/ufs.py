@@ -15,7 +15,6 @@ def ufs(X, Nc):
         rSquare: The smallest R squared value of each of the selected components
         compID: The component ID of each of the selected features 
     """
-
     # Normalise matrix columns to have zero mean and unit variance
     X = preprocessing.normalize(X, axis=0)
   
@@ -55,7 +54,7 @@ def ufs(X, Nc):
         v = R[idx]
         compID = np.append(compID, col_idxs[idx])
         rSquare = np.append(rSquare, v)
-
+        
         # For each remaining column, calculate its squared multiple correlation coefficient
         # R^2 wih the selected columns
         Xj = np.atleast_2d(X[:,col_idxs[idx]]).T
@@ -71,4 +70,3 @@ def ufs(X, Nc):
 
     #return results
     return S, M, rSquare.tolist(), compID.tolist()
-
