@@ -46,7 +46,7 @@ def fsca_stochastic_greedy_deflation( X, Nc, percentage=0.5):
     idxs = get_sample_idxs()
     Y = np.take(X, idxs, axis=0)
 
-    TR = TR + np.trace(np.matmul(Y.T, Y))
+    TR = np.trace(np.matmul(Y.T, Y))
 
     # Keep track of columns not selected
     col_idxs = np.arange(X.shape[1])
@@ -85,7 +85,7 @@ def fsca_stochastic_greedy_deflation( X, Nc, percentage=0.5):
         idxs = get_sample_idxs()
         Y = np.take(X, idxs, axis=0)
 
-        TR = TR + np.trace(np.matmul(Y.T, Y))
+        TR = np.trace(np.matmul(Y.T, Y))
 
         # Perform deflation step using the already selected columns
         for id in compID:

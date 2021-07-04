@@ -46,7 +46,7 @@ def fsca_stochastic_greedy_orthogonal( X, Nc, percentage=0.5):
     idxs = get_sample_idxs()
     Y = np.take(X, idxs, axis=0)
 
-    TR = TR + np.trace(np.matmul(Y.T, Y))
+    TR = np.trace(np.matmul(Y.T, Y))
 
     # Keep track of column indexes not selected
     col_idxs = np.arange(X.shape[1])
@@ -82,7 +82,7 @@ def fsca_stochastic_greedy_orthogonal( X, Nc, percentage=0.5):
         idxs = get_sample_idxs()
         Y = np.take(X, idxs, axis=0)
 
-        TR = TR + np.trace(np.matmul(Y.T, Y))
+        TR = np.trace(np.matmul(Y.T, Y))
 
         # Orthogonalise the current subset using the already selected columns as a basis
         Q, _ = qr(Y[:,compID]) # Columns of Q are orthonormal
@@ -110,7 +110,7 @@ def fsca_stochastic_greedy_orthogonal( X, Nc, percentage=0.5):
 
         # Calculate the accumulated variance explained with the inclusion of this feature
         VEX = VEX + np.divide(100*v, TR)
-
+        
         # Store results
         compID.append(col_idxs[idx])
         VarEx.append(VEX)
