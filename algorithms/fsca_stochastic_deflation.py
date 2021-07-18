@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.linalg import qr
 
-def fsca_stochastic_greedy_deflation( X, Nc, percentage=0.1):
+def fsca_stochastic_greedy_deflation( X, Nc, percentage=0.5):
     """ This function implements the Forward Selection Component Analysis algorithm with
     Stochastic Greedy (also known as lazier than lazy greedy) optimisation applied.
     At each iteration a random sample of the original data is taken and is used to 
@@ -13,7 +13,7 @@ def fsca_stochastic_greedy_deflation( X, Nc, percentage=0.1):
         X (A 2D numpy array): The matrix m x v -> m is measurements, v is variables
         Nc (Int): The number of components to select
         percentage (int, optional): If random sampling occurs with replacement - this is the percentage
-            of data selected from the original data. Defaults to 0.1
+            of data selected from the original data. Defaults to 0.5
 
     Returns:
         S: The column vectors of each selected feature during each iteration
@@ -46,7 +46,7 @@ def fsca_stochastic_greedy_deflation( X, Nc, percentage=0.1):
     idxs = get_sample_idxs()
     Y = np.take(X, idxs, axis=0)
 
-    TR = TR + np.trace(np.matmul(Y.T, Y))
+    TR = np.trace(np.matmul(Y.T, Y))
 
     # Keep track of columns not selected
     col_idxs = np.arange(X.shape[1])
@@ -85,7 +85,7 @@ def fsca_stochastic_greedy_deflation( X, Nc, percentage=0.1):
         idxs = get_sample_idxs()
         Y = np.take(X, idxs, axis=0)
 
-        TR = TR + np.trace(np.matmul(Y.T, Y))
+        TR = np.trace(np.matmul(Y.T, Y))
 
         # Perform deflation step using the already selected columns
         for id in compID:

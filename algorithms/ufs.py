@@ -15,14 +15,17 @@ def ufs(X, Nc):
         rSquare: The smallest R squared value of each of the selected components
         compID: The component ID of each of the selected features 
     """
-
     # Normalise matrix columns to have zero mean and unit variance
     X = preprocessing.normalize(X, axis=0)
   
     # Correlation matrix X^T * X
-    sq_corr = np.square(np.matmul(X.T, X))
+    sq_corr = np.abs(np.matmul(X.T, X))
+    # Upper triangular of correlation matrix
+    # Mask lower triangular so zero values aren't included in min function
+    masked_upper = np.ma.masked_less_equal(np.triu(sq_corr), 0)
+    
     # Select as the first two columns those with the smallest squared correlation coefficient
-    c_idxs = np.argpartition(np.min(sq_corr, axis=1), kth=1)[:2]
+    c_idxs = np.argpartition(np.min(masked_upper, axis=1), kth=1)[:2]
 
     # Keep track of column indexes not selected
     col_idxs = np.arange(X.shape[1])
@@ -43,7 +46,7 @@ def ufs(X, Nc):
     c = np.append(c1, c2, axis=1)
 
     compID = c_idxs
-    rSquare.append(np.min(sq_corr, axis=1)[c_idxs])
+    rSquare.append(np.min(sq_corr, axis=1)[c_idxs]*100)
     
     # update col_idxs by removing indexes of selected columns
     col_idxs = np.delete(col_idxs, c_idxs)
@@ -51,11 +54,12 @@ def ufs(X, Nc):
     # loop for remaining columns
     for _ in range(2, Nc):
         R = norm(np.matmul(np.matmul(c, c.T), X[:,col_idxs]), axis=0)
+
         idx = np.argmin(R)
         v = R[idx]
         compID = np.append(compID, col_idxs[idx])
-        rSquare = np.append(rSquare, v)
-
+        rSquare = np.append(rSquare, v*100)
+        
         # For each remaining column, calculate its squared multiple correlation coefficient
         # R^2 wih the selected columns
         Xj = np.atleast_2d(X[:,col_idxs[idx]]).T
@@ -65,10 +69,9 @@ def ufs(X, Nc):
         c = np.append(c, ck, axis=1)
         # Update col_idxs by removing the index of the column selected in the current iteration
         col_idxs = np.delete(col_idxs, idx)
-    
+
     S = X[:,compID]
     M = c
 
     #return results
     return S, M, rSquare.tolist(), compID.tolist()
-

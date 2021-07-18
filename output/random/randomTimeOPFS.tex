@@ -1,0 +1,73 @@
+% This file was created by tikzplotlib v0.9.9.
+\begin{tikzpicture}
+
+\definecolor{color0}{rgb}{0.12156862745098,0.466666666666667,0.705882352941177}
+\definecolor{color1}{rgb}{1,0.498039215686275,0.0549019607843137}
+\definecolor{color2}{rgb}{0.172549019607843,0.627450980392157,0.172549019607843}
+
+\begin{axis}[
+legend cell align={left},
+legend style={
+  fill opacity=0.8,
+  draw opacity=1,
+  text opacity=1,
+  at={(0.03,0.97)},
+  anchor=north west,
+  draw=white!80!black
+},
+tick align=outside,
+tick pos=left,
+x grid style={white!69.0196078431373!black},
+xlabel={Number of Columns},
+xmin=27.5, xmax=522.5,
+xtick style={color=black},
+y grid style={white!69.0196078431373!black},
+ylabel={Duration(s)},
+ymin=-0.0297462, ymax=0.9913222,
+ytick style={color=black}
+]
+\addplot [semithick, color0]
+table {%
+50 0.016666
+100 0.026818
+150 0.035922
+200 0.036102
+250 0.041561
+300 0.075483
+350 0.059445
+400 0.06281
+450 0.070273
+500 0.086974
+};
+\addlegendentry{OPFS}
+\addplot [semithick, color1]
+table {%
+50 0.207594
+100 0.24352
+150 0.299691
+200 0.365726
+250 0.383349
+300 0.525546
+350 0.64633
+400 0.688378
+450 0.541439
+500 0.94491
+};
+\addlegendentry{SGO-OPFS}
+\addplot [semithick, color2]
+table {%
+50 0.178858
+100 0.167856
+150 0.139039
+200 0.184173
+250 0.190699
+300 0.169567
+350 0.172648
+400 0.171127
+450 0.225818
+500 0.311095
+};
+\addlegendentry{SGD-OPFS}
+\end{axis}
+
+\end{tikzpicture}

@@ -77,7 +77,7 @@ def fsca_lazy_greedy(X, Nc=1):
             x = np.atleast_2d(X[:, idxs[pos]]).T # column -> value at current position in idxs
             r = np.matmul(X.T, x)
             # increment in variance contribution with inclusion of this variable
-            rQ = np.matmul(r.T, np.divide(r, np.matmul(x.T, x)))
+            rQ = np.matmul(r.T, np.divide(r, np.matmul(x.T, x) + np.finfo(float).eps))
             g[pos] = 100 * np.divide(rQ, TR) # convert rayleigh quotient to variance explained
 
             # Check best gain: bg

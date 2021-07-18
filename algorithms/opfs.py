@@ -1,5 +1,5 @@
 import numpy as np 
-from helpers.algorithms.pca import pca_first_nipals
+from helpers.pca import pca_first_nipals
 
 def opfs(X, Nc=1):
     """This function implements the baseline Orthogonal Principal Feature Selection algorithm
