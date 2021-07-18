@@ -1,0 +1,78 @@
+% This file was created by tikzplotlib v0.9.9.
+\begin{tikzpicture}
+
+\definecolor{color0}{rgb}{0.12156862745098,0.466666666666667,0.705882352941177}
+\definecolor{color1}{rgb}{1,0.498039215686275,0.0549019607843137}
+\definecolor{color2}{rgb}{0.172549019607843,0.627450980392157,0.172549019607843}
+\definecolor{color3}{rgb}{0.83921568627451,0.152941176470588,0.156862745098039}
+\definecolor{color4}{rgb}{0.580392156862745,0.403921568627451,0.741176470588235}
+
+\begin{axis}[
+legend cell align={left},
+legend style={
+  fill opacity=0.8,
+  draw opacity=1,
+  text opacity=1,
+  at={(0.03,0.97)},
+  anchor=north west,
+  draw=white!80!black
+},
+tick align=outside,
+tick pos=left,
+x grid style={white!69.0196078431373!black},
+xlabel={Sample Percentage},
+xmin=0.06, xmax=0.94,
+xtick style={color=black},
+y grid style={white!69.0196078431373!black},
+ylabel={Computation Time (in seconds)},
+ymin=0.00149925, ymax=0.01764175,
+ytick style={color=black}
+]
+\addplot [semithick, color0]
+table {%
+0.1 0.005094
+0.3 0.004488
+0.5 0.006094
+0.7 0.00826
+0.9 0.010519
+};
+\addlegendentry{SGO-FSCA}
+\addplot [semithick, color1]
+table {%
+0.1 0.002233
+0.3 0.002298
+0.5 0.002243
+0.7 0.002631
+0.9 0.002903
+};
+\addlegendentry{SGD-FSCA}
+\addplot [semithick, color2]
+table {%
+0.1 0.005871
+0.3 0.011487
+0.5 0.011226
+0.7 0.016908
+0.9 0.016799
+};
+\addlegendentry{SGO-OPFS}
+\addplot [semithick, color3]
+table {%
+0.1 0.005958
+0.3 0.006461
+0.5 0.007663
+0.7 0.007343
+0.9 0.008012
+};
+\addlegendentry{SGD-OPFS}
+\addplot [semithick, color4]
+table {%
+0.1 0.004154
+0.3 0.003356
+0.5 0.002845
+0.7 0.004556
+0.9 0.005155
+};
+\addlegendentry{SG-UFS}
+\end{axis}
+
+\end{tikzpicture}
