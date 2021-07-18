@@ -57,7 +57,7 @@ def opfs_stochastic_greedy_deflation(X, Nc=1, percentage=0.5):
 
     # First component
     # Column vector containing variance for each column
-    VT =  VT + np.var(Y)
+    VT = np.var(Y)
 
     # Calculate scores of 1st pc for curr_Y using nipals algorithm
     t1 = pca_first_nipals(Y[:,col_idxs])
@@ -78,7 +78,7 @@ def opfs_stochastic_greedy_deflation(X, Nc=1, percentage=0.5):
     YhatP =  YhatP + Yhat
 
     # Accumulated variance explained
-    VEX = VEX + np.divide(np.var(Yhat), VT) * 100
+    VEX = np.divide(np.var(Yhat), VT) * 100
 
     # Store results
     compID.append(col_idxs[idx])
@@ -104,7 +104,7 @@ def opfs_stochastic_greedy_deflation(X, Nc=1, percentage=0.5):
             M.append(th)
         
         # Column vector containing variance for each column
-        VT =  VT + np.var(Y)
+        VT = np.var(Y)
 
         # Calculate scores of 1st pc for curr_Y using nipals algorithm
         t1 = pca_first_nipals(Y[:,col_idxs])
@@ -124,7 +124,7 @@ def opfs_stochastic_greedy_deflation(X, Nc=1, percentage=0.5):
         Yhat = np.matmul(x, th)
 
         # Accumulated variance explained
-        VEX =  VEX + np.divide(np.var(Yhat), VT) * 100
+        VEX =  np.divide(np.var(Yhat), VT) * 100
 
         # Store results
         compID.append(col_idxs[idx])

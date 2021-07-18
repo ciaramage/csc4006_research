@@ -32,10 +32,16 @@ def ufs_stochastic_greedy(X, Nc, percentage=0.5):
     idxs = get_sample_idxs()
     Y = np.take(X, idxs, axis=0)
 
-    # Square correlation matrix: (X^T * X)**2 
-    sq_corr = np.square(np.matmul(Y.T, Y))
-    # Select as the first two columns those with the smallest squared correlation coefficient
-    c_idxs = np.argpartition(np.min(sq_corr, axis=1), kth=1)[:2]
+    # Correlation matrix X^T * X
+    sq_corr = np.abs(np.matmul(X.T, X))
+    # Upper triangular of correlation matrix
+    upper = np.triu(sq_corr)
+    # Mask lower triangular so zero values aren't included in min function
+    masked_upper = np.ma.masked_less_equal(upper, 0)
+    
+    # Column indexes of the two smallest squared correlation coefficient
+    c_idxs = np.argpartition(np.min(masked_upper, axis=1), kth=1)[:2]
+
     # Keep track of column indexes not selected
     col_idxs = np.arange(X.shape[1])
     col_idxs = np.delete(col_idxs, c_idxs)
@@ -46,7 +52,7 @@ def ufs_stochastic_greedy(X, Nc, percentage=0.5):
     rSquare = []
     compID = []
     compID = c_idxs
-    rSquare.append(np.min(sq_corr, axis=1)[c_idxs])
+    rSquare.append(np.min(sq_corr, axis=1)[c_idxs] * 100)
     
     # Loop for remaining components
     for _ in range(0, Nc-2):
@@ -71,7 +77,7 @@ def ufs_stochastic_greedy(X, Nc, percentage=0.5):
         v = R[idx]
        
         compID = np.append(compID, col_idxs[idx])
-        rSquare = np.append(rSquare, v)
+        rSquare = np.append(rSquare, v*100)
 
         # Update col_idxs by removing the index of the column selected 
         # in the current iteration

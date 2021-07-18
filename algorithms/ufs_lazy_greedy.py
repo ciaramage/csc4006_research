@@ -21,9 +21,14 @@ def ufs_lazy_greedy(X, Nc):
     X = preprocessing.normalize(X, axis=0) # axis=0 for column wise 
 
     # Correlation matrix X^T * X
-    sq_corr = np.square(np.matmul(X.T, X))
-    # Select as the first two columns those with the smallest squared correlation coefficient
-    c_idxs = np.argpartition(np.min(sq_corr, axis=1), kth=1)[:2]
+    sq_corr = np.abs(np.matmul(X.T, X))
+    # Upper triangular of correlation matrix
+    upper = np.triu(sq_corr)
+    # Mask lower triangular so zero values aren't included in min function
+    masked_upper = np.ma.masked_less_equal(upper, 0)
+    
+    # Column indexes of the two smallest squared correlation coefficient
+    c_idxs = np.argpartition(np.min(masked_upper, axis=1), kth=1)[:2]
 
     # Keep track of column indexes not selected
     col_idxs = np.arange(X.shape[1])
@@ -44,7 +49,7 @@ def ufs_lazy_greedy(X, Nc):
     c = np.append(c1, c2, axis=1)
 
     compID = c_idxs
-    rSquare.append(np.min(sq_corr, axis=1)[c_idxs])
+    rSquare.append(np.min(sq_corr, axis=1)[c_idxs]*100)
     
     # Update col_idxs by removing indexes of selected columns
     col_idxs = np.delete(col_idxs, c_idxs)
@@ -66,6 +71,7 @@ def ufs_lazy_greedy(X, Nc):
         bgIdx = 0 # best gain index
         wg = 0 # worst gain
         wgIdx = 0 # worst gain index
+
         while True:
             # find the column represented by the current position in list of gains: g
             idx = np.where(np.isin(col_idxs, gIdxs[pos]))[0].item()
@@ -92,7 +98,7 @@ def ufs_lazy_greedy(X, Nc):
         
         # append to data storage
         compID = np.append(compID, bgIdx)
-        rSquare = np.append(rSquare, bg)
+        rSquare = np.append(rSquare, bg*100)
 
         # resort the list of gains and indexes
         if pos < len(gIdxs)-1:
@@ -100,6 +106,7 @@ def ufs_lazy_greedy(X, Nc):
                 pos = pos + 1
                 if pos == len(gIdxs)-1:
                     break
+        
         newIdxs = np.argsort(g[0:pos].flatten('C'))
         g[0:pos] = g[newIdxs]
         gIdxs[0:pos] = gIdxs[newIdxs]
@@ -111,7 +118,10 @@ def ufs_lazy_greedy(X, Nc):
 
         # update the orthonormal basis for the subspace spanned by the selected columns: c
         c = np.append(c, ck, axis=1)
-    
+
+        # Update col_idxs by removing the index of the column selected in the current iteration
+        col_idxs = np.delete(col_idxs, idx)
+
     S = X[:,compID]
     M = c
     
