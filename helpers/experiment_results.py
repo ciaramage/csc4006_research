@@ -41,7 +41,7 @@ def random_duration(alg_type):
     
     return x, duration
 
-def real_results(alg_type, ds):
+def real_results(alg_type, ds, percentage=0.5):
     names = get_names[alg_type]
     data_path = datasets[ds]
     mat = read_matrix(data_path)
@@ -51,11 +51,12 @@ def real_results(alg_type, ds):
     compID = defaultdict(list)
 
     for alg in names:
-        res = select_features(alg, mat, Nc)
+        res = select_features(alg, mat, Nc, percentage)
         duration[alg].append(res.duration)
         varEx[alg] = res.variance_explained
         compID[alg] = res.component_id
 
+    # test output with print statements 
     for k in duration.keys():
         print(k)
         print(duration[k])
@@ -64,3 +65,38 @@ def real_results(alg_type, ds):
         print('\n')
     
     return ds, duration, varEx, compID
+
+def real_sg_compare_results(ds, percentages):
+    # Get the dataset
+    names = get_names['sg']
+    data_path = datasets[ds]
+    mat = read_matrix(data_path)
+
+    # Setup storage for results
+    # duration[alg_type][percentage] = list of durations 
+    duration = defaultdict(lambda: defaultdict(list))
+    # varEx[alg_type][percentage] = list of explained variances
+    varEx = defaultdict(lambda: defaultdict(list))
+    # compID[alg_type][percentage] = list of component IDs
+    compID = defaultdict(lambda: defaultdict(list))
+
+    # for each stochastic greedy algorithm represented by its name in the names list
+    for alg in names:
+        
+        # select Nc features using p percent of the data each iteration
+        for p in percentages:
+            res = select_features(alg, mat, Nc, p)
+            duration[alg][p] = (res.duration)
+            varEx[alg][p] = (res.variance_explained)
+            compID[alg][p] = (res.component_id)
+
+    # test output with print statements 
+    """ for k in duration.keys():
+        print(k)
+        print(duration[k])
+        print(varEx[k])
+        print(compID[k])
+        print('\n') """
+
+    return ds, duration, varEx, compID
+
