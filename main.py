@@ -8,10 +8,10 @@ def main():
     #plot_random_times()
     #randomDataInfo()
     #realDataInfo()
-
+    X = read_matrix('data/realData/wdbc.txt')
     #plot_real('glg','Xpitprops')
 
-    real_results('opfs', 'breastCancerDiagnosis', 0.5)
+    real_results('ufs', 'breastCancerDiagnosis', 0.3)
 
     #real_sg_compare_results('Xpitprops', [0.1,0.3,0.5,0.7,0.9])
 

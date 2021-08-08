@@ -1,4 +1,5 @@
 import numpy as np
+from numpy.lib import corrcoef
 from numpy.linalg import norm
 from sklearn import preprocessing
 
@@ -19,7 +20,8 @@ def ufs(X, Nc):
     X = preprocessing.normalize(X, axis=0)
   
     # Correlation matrix X^T * X
-    sq_corr = np.abs(np.matmul(X.T, X))
+    sq_corr = np.matmul(X.T, X)
+
     # Upper triangular of correlation matrix
     # Mask lower triangular so zero values aren't included in min function
     masked_upper = np.ma.masked_less_equal(np.triu(sq_corr), 0)
@@ -31,47 +33,41 @@ def ufs(X, Nc):
     col_idxs = np.arange(X.shape[1])
 
     # Setup storage variables
-    S = []
     M = []
     rSquare = []
     compID = []
 
-    # Choose an orthonormal basis c = {c1,c2} for the subspace of R^P spanned by the first two columns
-    # if the first two columns are Xa and Xb
-    # c1 = Xa, and c2 = Y/|Y| - where Y = Xa - (Xb*Xa)*Xa
-    c1 = np.atleast_2d(X[:,c_idxs[0]]).T
-    Xb = np.atleast_2d(X[:,c_idxs[1]]).T
-    c2 = c1 - np.dot(c1.T, Xb)*c1
-    c2 = np.divide(c2, norm(c2))
-    c = np.append(c1, c2, axis=1)
-
     compID = c_idxs
-    rSquare.append(np.min(sq_corr, axis=1)[c_idxs]*100)
-    
-    # update col_idxs by removing indexes of selected columns
-    col_idxs = np.delete(col_idxs, c_idxs)
+    rSquare.append(np.min(masked_upper, axis=1)[c_idxs]*100)
 
-    # loop for remaining columns
-    for _ in range(2, Nc):
+    for _ in range(0, Nc - 2):
+        # Choose an orthonormal basis c = {c1,c2} for the subspace of R^P spanned by the selected columns
+        # if the first two columns are Xa and Xb, slide across each pair of columns
+        # c1 = Xa, and c2 = Z/|Z| - where Z = Xa - (Xb*Xa)*Xa
+        c = get_c(X, compID)
+
+        # For each remaining column, calculate its squared multiple correlation coefficient
+        # R^2 with the selected columns
         R = norm(np.matmul(np.matmul(c, c.T), X[:,col_idxs]), axis=0)
-
         idx = np.argmin(R)
         v = R[idx]
+       
         compID = np.append(compID, col_idxs[idx])
         rSquare = np.append(rSquare, v*100)
-        
-        # For each remaining column, calculate its squared multiple correlation coefficient
-        # R^2 wih the selected columns
-        Xj = np.atleast_2d(X[:,col_idxs[idx]]).T
-        ck = Xj - np.matmul(np.matmul(c, c.T), Xj)
-        ck = np.divide(ck, norm(ck))
-        # Update the orthonormal basis for the subspace spanned by the selected columns: c
-        c = np.append(c, ck, axis=1)
-        # Update col_idxs by removing the index of the column selected in the current iteration
+
+        # Update col_idxs by removing the index of the column selected 
+        # in the current iteration
         col_idxs = np.delete(col_idxs, idx)
 
+        M = np.append(M, c)
     S = X[:,compID]
-    M = c
-
-    #return results
     return S, M, rSquare.tolist(), compID.tolist()
+
+def get_c(X, idxs):
+    c = np.atleast_2d(X[:,idxs[0]]).T
+    for i in range(1, len(idxs)):
+        Xi = np.atleast_2d(X[:,idxs[i]]).T
+        ci = Xi - np.matmul(np.matmul(c, c.T), Xi)
+        ci = np.divide(ci, norm(ci))
+        c = np.append(c, ci, axis=1)
+    return c

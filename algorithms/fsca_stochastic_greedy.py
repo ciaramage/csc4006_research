@@ -48,16 +48,13 @@ def fsca_stochastic_greedy_orthogonal( X, Nc, percentage=0.5):
 
     TR = np.trace(np.matmul(Y.T, Y))
 
-    # Keep track of column indexes not selected
-    col_idxs = np.arange(X.shape[1])
-
     # Initialise storage for rayleigh quotient values
-    rQ = np.zeros(len(col_idxs))
+    rQ = np.zeros(Y.shape[1])
 
     # First component
-    for i in range(len(col_idxs)):
+    for i in range(Y.shape[1]):
         # Column i
-        x = np.atleast_2d(Y[:,col_idxs[i]]).T
+        x = np.atleast_2d(Y[:,i]).T
         # Rayleigh quotient for column 
         r = np.matmul(Y.T, x)
         rQ[i] = np.matmul(r.T, np.divide(r, np.matmul(x.T, x)))
@@ -73,9 +70,6 @@ def fsca_stochastic_greedy_orthogonal( X, Nc, percentage=0.5):
     compID.append(idx)
     VarEx.append(VEX)
 
-    # Update col_idxs by removing indexes of selected columns
-    col_idxs =np.delete(col_idxs, idx)
-
     # Loop for remaining components
     for i in range(1,Nc):
         # Update sample
@@ -85,7 +79,8 @@ def fsca_stochastic_greedy_orthogonal( X, Nc, percentage=0.5):
         TR = np.trace(np.matmul(Y.T, Y))
 
         # Orthogonalise the current subset using the already selected columns as a basis
-        Q, _ = qr(Y[:,compID]) # Columns of Q are orthonormal
+        #Q, _ = qr(Y[:,compID]) # Columns of Q are orthonormal
+        Q = gram_schmidt(Y[:,compID])
         Yj = np.zeros(Y.shape)
         for j in range(L):
             yj = np.matmul(np.matmul(Q, Q.T), Y[:,j])
@@ -93,13 +88,12 @@ def fsca_stochastic_greedy_orthogonal( X, Nc, percentage=0.5):
         Y = np.subtract(Y, Yj)
         M.append(Q)
 
-    
         # Calculate the Rayleigh Quotients
         # Update storage for rayleigh quotient values
-        rQ = np.zeros(len(col_idxs))
-        for j in range(len(col_idxs)):
+        rQ = np.zeros(Y.shape[1])
+        for j in range(Y.shape[1]):
             # Column j
-            x = np.atleast_2d(Y[:,col_idxs[j]]).T
+            x = np.atleast_2d(Y[:,j]).T
             # Rayleigh quotient for column 
             r = np.matmul(Y.T, x)
             rQ[j] = np.matmul(r.T, np.divide(r, np.matmul(x.T, x)))
@@ -112,12 +106,53 @@ def fsca_stochastic_greedy_orthogonal( X, Nc, percentage=0.5):
         VEX = VEX + np.divide(100*v, TR)
         
         # Store results
-        compID.append(col_idxs[idx])
+        compID.append(idx)
         VarEx.append(VEX)
-
-        # Update col_idxs by removing index of selected column
-        col_idxs = np.delete(col_idxs, idx)
         
     S = X[:,compID]
 
     return S, M, VarEx, compID
+
+def gs(A):
+    R = np.zeros((A.shape[1], A.shape[1]))
+    Q = np.zeros(A.shape)
+    for k in range(A.shape[1]):
+        R[k, k] = np.sqrt(np.dot(A[:,k], A[:,k]))
+        Q[:,k] = A[:,k] / R[k,k]
+        for j in range(k+1, A.shape[1]):
+            R[k,j] = np.dot(Q[:,k], A[:,j])
+            A[:,j] = A[:,j] - R[k,j] * Q[:,k]
+    return Q
+
+def gram_schmidt(X):
+    """ Implements Gram-Schmidt orthogonalization.
+
+    Args:
+        X (A 2D numpy array): The columns of X are linearly independent
+
+    Returns:
+        U: (A 2D numpy array): The column of U are orthonormal
+    """
+
+    # Set up
+    n, k = X.shape
+    U = np.empty((n, k))
+    I = np.eye(n)
+
+    # The first col of U is just the normalized first col of X
+    v1 = X[:,0]
+    U[:, 0] = v1 / np.sqrt(np.sum(v1 * v1))
+
+    for i in range(1, k):
+        # Set up
+        b = X[:, i]       # The vector we're going to project
+        Z = X[:, 0:i]     # First i-1 columns of X
+
+        # Project onto the orthogonal complement of the col span of Z
+        M = I - Z @ np.linalg.inv(Z.T @ Z) @ Z.T
+        u = M @ b
+
+        # Normalize
+        U[:, i] = u / np.sqrt(np.sum(u * u))
+
+    return U
