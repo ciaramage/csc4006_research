@@ -1,4 +1,5 @@
-import numpy as np 
+import numpy as np
+from numpy.linalg import norm
 from helpers.pca import pca_first_nipals
 
 def opfs(X, Nc=1):
@@ -16,60 +17,93 @@ def opfs(X, Nc=1):
         compID: The component ID of each of the selected features 
     """
     Y = X.copy()
+
     # Algorithm requires matrix X to have zero mean columns
     mX = X.mean(axis=0) 
     if( max(mX) > 10**-6):
         # Columns not mean centered
         print("\nWarning: Data not zero mean... detrending\n")
-        X = X- mX
-        
-    # Number of features (columns) in matrix X
-    L = X.shape[1] 
+        X = X- mX    
 
-    # Sum of column variance
-    VT= np.var(Y)
-
-    # Keep track of columns not yet selected
-    col_idxs = np.arange(X.shape[1])
-    
-    # Initialize storage variables
     compID = []
-    VarEx = []
-    YhatP = 0
-    VEX = 0
     M = []
-    
-    for _ in range(0,Nc):
-        EFS=np.zeros(len(col_idxs))
-        # Calculate scores of 1st principle component for Y using nipals algorithm
-        t1  = pca_first_nipals(Y[:,col_idxs])
-        for i in range(len(col_idxs)):
-            # Column col_idxs[i]
-            x = np.atleast_2d(Y[:,col_idxs[i]]).T
+    varEx = []
+    vex = 0
+    VT =  np.var(Y)
 
-            # Addition of machine float epsilon prevents division by zero
-            EFS[i] = np.divide( np.square(np.matmul(x.T, t1)), np.matmul(x.T,x) + np.finfo(float).eps)
+    for _ in range(Nc):
+        # Find the first eigenvector. Use PCA to find the principle component with the largest eigenvalue
+        pc  = pca_first_nipals(Y)
+        EFS = np.zeros(Y.shape[1])
 
-        # Maximise the eigenvectors - the variable most correlated with first principal component
+        # Find the feature from the orthogonal dataset that is most correlated to the largest eigen vector
+        for i in range(Y.shape[1]):
+            # feature column f in Y
+            f = np.atleast_2d(Y[:,i]).T
+            corr = np.divide( np.matmul(f.T, pc), norm(f))
+            EFS[i] = corr
+
         idx = np.nanargmax(EFS) # index of variable with max EFS
-        x = np.atleast_2d(Y[:,col_idxs[idx]]).T
+        x = np.atleast_2d(Y[:,idx]).T # feature of variable with max correlation with pc
 
-        # Deflate matrix
-        th = np.matmul(np.linalg.pinv(x),Y)
-        Yhat = np.matmul(x, th)
-        Y = Y-Yhat
-        
-        # Calculate accumulated variance explained
-        YhatP = YhatP + Yhat
-        VEX= np.divide(np.var(YhatP), VT) *100
-        
-        # Store results
-        M.append(th.T)
-        compID.append(col_idxs[idx])
-        VarEx.append(VEX)
+        compID.append(idx)
+        S = [x]
 
-        # Update col_idxs bby removing index of selected feature
-        col_idxs = np.delete(col_idxs, idx)
+        # feature selected -> reduce the search space
+
+        # Projection of vector x onto the subspace spanned by the columns of Y
+        P = gram_schmidt(x) # P -> subspace spanned by columns of Y
+
+        # For each remaining column in Y, project to the subspace orthogonal to feature x
+        Yj = np.empty(Y.shape)
+        for i in range(Y.shape[1]):
+            yj = np.matmul(np.matmul(P, P.T), Y[:,i])
+            Yj[:,i] = yj
+        Y = np.subtract(Y, Yj) 
+        vex =  vex + Yj
+
+        varEx.append(np.var(vex) / VT * 100)
+
+        M.append(P)
 
     S = X[:,compID]
-    return S, M, VarEx, compID
+    
+    return S, M, varEx, compID
+
+
+def gram_schmidt(X):
+    """
+    Implements Gram-Schmidt orthogonalization.
+
+    Parameters
+    ----------
+    X : an n x k array with linearly independent columns
+
+    Returns
+    -------
+    U : an n x k array with orthonormal columns
+
+    """
+
+    # Set up
+    n, k = X.shape
+    U = np.empty((n, k))
+    I = np.eye(n)
+
+    # The first col of U is just the normalized first col of X
+    v1 = X[:,0]
+    U[:, 0] = v1 / np.sqrt(np.sum(v1 * v1))
+
+    for i in range(1, k):
+        # Set up
+        b = X[:, i]       # The vector we're going to project
+        Z = X[:, 0:i]     # First i-1 columns of X
+
+        # Project onto the orthogonal complement of the col span of Z
+        M = I - Z @ np.linalg.inv(Z.T @ Z) @ Z.T
+        u = M @ b
+
+        # Normalize
+        U[:, i] = u / np.sqrt(np.sum(u * u))
+
+    return U

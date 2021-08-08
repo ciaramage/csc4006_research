@@ -33,7 +33,7 @@ def ufs_stochastic_greedy(X, Nc, percentage=0.5):
     Y = np.take(X, idxs, axis=0)
 
     # Correlation matrix X^T * X
-    sq_corr = np.abs(np.matmul(X.T, X))
+    sq_corr = np.matmul(Y.T, Y)
     # Upper triangular of correlation matrix
     upper = np.triu(sq_corr)
     # Mask lower triangular so zero values aren't included in min function
@@ -41,6 +41,7 @@ def ufs_stochastic_greedy(X, Nc, percentage=0.5):
     
     # Column indexes of the two smallest squared correlation coefficient
     c_idxs = np.argpartition(np.min(masked_upper, axis=1), kth=1)[:2]
+
 
     # Keep track of column indexes not selected
     col_idxs = np.arange(X.shape[1])
@@ -52,24 +53,19 @@ def ufs_stochastic_greedy(X, Nc, percentage=0.5):
     rSquare = []
     compID = []
     compID = c_idxs
-    rSquare.append(np.min(sq_corr, axis=1)[c_idxs] * 100)
-    
+    rSquare.append(np.min(masked_upper, axis=1)[c_idxs]*100)
+
     # Loop for remaining components
     for _ in range(0, Nc-2):
         # Update sample
         y_idx = get_sample_idxs()
         Y = np.take(X, y_idx, axis=0)
 
-        # Choose an orthonormal basis c = {c1,c2} for the subspace of R^P spanned by the first two columns
-        # if the first two columns are Xa and Xb
+        # Choose an orthonormal basis c = {c1,c2} for the subspace of R^P spanned by the selected columns
+        # if the first two columns are Xa and Xb, slide across each pair of columns
         # c1 = Xa, and c2 = Z/|Z| - where Z = Xa - (Xb*Xa)*Xa
         c = get_c(Y, compID)
 
-        # If > 2 components have already been selected
-        if len(compID) > 2:
-            # Update the orthonormal basis for the subspace spanned by the selected columns: c
-            c = get_c(Y, compID)
-            M = np.append(M, c)
         # For each remaining column, calculate its squared multiple correlation coefficient
         # R^2 with the selected columns
         R = norm(np.matmul(np.matmul(c, c.T), Y[:,col_idxs]), axis=0)

@@ -1,6 +1,6 @@
 import numpy as np 
 from helpers.pca import pca_first_nipals
-from numpy.linalg import qr
+from numpy.linalg import norm
 
 def opfs_stochastic_greedy_orthogonal(X, Nc=1, percentage=0.5):
     """This function implements the Orthogonal Principal Feature Selection algorithm with
@@ -21,7 +21,6 @@ def opfs_stochastic_greedy_orthogonal(X, Nc=1, percentage=0.5):
         VarEx: The accumulated variance explained with the inclusion of each selected feature
         compID: The component ID of each of the selected features 
     """
-    Y = X.copy()
     # Matrix needs to be zero mean
     mX = X.mean(axis=0)
     if(max(mX) > 10**-6):
@@ -41,96 +40,139 @@ def opfs_stochastic_greedy_orthogonal(X, Nc=1, percentage=0.5):
     # Initialize storage variables
     S = []
     M = []
-    VarEx = []
+    varEx = []
     compID = []
-    VEX = 0
+    vex = 0
     VT = 0
-
-    # Keep track of olumns not yet selected
-    col_idxs = np.arange(X.shape[1])
-
-    # Initialise storage for eigen vectors
-    EFS = np.zeros(len(col_idxs))
 
     # Data subset for this iteration
     y_idxs = get_sample_idxs()
     Y = np.take(X, y_idxs, axis=0)
 
-    # First component
+    # Initialise storage for eigen vectors
+    EFS = np.zeros(Y.shape[1])
+
+    ## First component
     # Column vector containing variance for each column
     VT =  np.var(Y)
 
     # Calculate scores of 1st pc for curr_Y using nipals algorithm
-    t1 = pca_first_nipals(Y[:,col_idxs])
+    pc = pca_first_nipals(Y)
 
     # Maximise efs
-    for i in range(len(col_idxs)):
-        x = np.atleast_2d(Y[:,col_idxs[i]]).T
-        EFS[i] = np.divide( np.square(np.matmul(x.T, t1)), np.matmul(x.T,x) + np.finfo(float).eps)
+    for i in range(Y.shape[1]):
+        # feature column f in Y
+        f = np.atleast_2d(Y[:,i]).T
+        corr = np.divide( np.matmul(f.T, pc), norm(f))
+        EFS[i] = corr
 
     # Select variable most correlated with first pc
-    #EFS[compID] = np.nan
     idx = np.nanargmax(EFS)
-    x = np.atleast_2d(Y[:,col_idxs[idx]]).T
+    x = np.atleast_2d(Y[:,idx]).T
 
     # Variance explained using matrix deflation
-    th = np.matmul(np.linalg.pinv(x), Y)
-    Yhat = np.matmul(x, th)
+    P = gram_schmidt(x) # P -> subspace spanned by columns of Y
+    #Yj = P @ P.T @ x # project feature X onto P
+
+    # For each remaining column in Y, project to the subspace orthogonal to feature x
+    Yj = np.empty(Y.shape)
+    for i in range(Y.shape[1]):
+        yj = np.matmul(np.matmul(P, P.T), Y[:,i])
+        Yj[:,i] = yj
+    Y = np.subtract(Y, Yj) 
+    vex =  vex + np.var(Yj)
 
     # Accumulated variance explained
-    VEX =  np.divide(np.var(Yhat), VT) * 100
+    VEX =  np.divide(vex, VT) * 100
 
     # Store results
-    compID.append(col_idxs[idx])
-    VarEx.append(VEX)
+    compID.append(idx)
+    varEx.append(VEX)
 
     # Update col_idxs bby removing index of selected feature
-    col_idxs = np.delete(col_idxs, idx)
+    #col_idxs = np.delete(col_idxs, idx)
     
     # Loop for remaining components
     for _ in range(1, Nc):
-        EFS = np.zeros(len(col_idxs))
+        EFS = np.zeros(Y.shape[1])
 
         # Data subset for this iteration
         y_idxs = get_sample_idxs()
         Y = np.take(X, y_idxs, axis=0)
 
         # Orthogonalization step
-        Q, _ = qr(Y[:, compID])
+        P = gram_schmidt(Y[:, compID])
         Yj = np.zeros(Y.shape)
         for i in range(0, Y.shape[1]):
-            yj = np.matmul(np.matmul(Q, Q.T), Y[:,i])
+            yj = np.matmul(np.matmul(P, P.T), Y[:,i])
             Yj[:,i] = yj
         Y = np.subtract(Y, Yj) 
-        M.append(Q)
-        
-        # Column vector containing variance for each column
-        VT =  np.var(Y)
+        M.append(P)
 
         # Calculate scores of 1st pc for remaining columns using nipals algorithm
-        t1 = pca_first_nipals(Y[:,col_idxs])
+        pc = pca_first_nipals(Y)
 
         # Maximise efs
-        for i in range(len(col_idxs)):
-            x = np.atleast_2d(Y[:, col_idxs[i]]).T
-            EFS[i] = np.divide( np.square(np.matmul(x.T, t1)), np.matmul(x.T,x) + np.finfo(float).eps)
+        for i in range(Y.shape[1]):
+                # feature column f in Y
+            f = np.atleast_2d(Y[:,i]).T
+            corr = np.divide( np.matmul(f.T, pc), norm(f))
+            EFS[i] = corr
 
         # Select variable most correlated with first pc
         idx = np.nanargmax(EFS)
-        x = np.atleast_2d(Y[:,col_idxs[idx]]).T
+        x = np.atleast_2d(Y[:,idx]).T
 
-        # Variance explained using matrix deflation
-        th = np.matmul(np.linalg.pinv(x), Y)
-        Yhat = np.matmul(x, th)
+        # Projection of vector x onto the subspace spanned by the columns of Y
+        P = gram_schmidt(x) # P -> subspace spanned by columns of Y
 
-        # Accumulated variance explained
-        VEX =  np.divide(np.var(Yhat), VT) * 100
+        # For each column in Y, project to the subspace orthogonal to feature x
+        Yj = np.empty(Y.shape)
+        for i in range(Y.shape[1]):
+            yj = np.matmul(np.matmul(P, P.T), Y[:,i])
+            Yj[:,i] = yj
+        vex =  vex + np.var(Yj)
+        varEx.append(vex / VT * 100)
 
         # Store results
-        compID.append(col_idxs[idx])
-        VarEx.append(VEX)
-
-        col_idxs = np.delete(col_idxs, idx)
+        compID.append(idx)
 
     S = X[:,compID]
-    return S, M, VarEx, compID
+    return S, M, varEx, compID
+
+def gram_schmidt(X):
+    """
+    Implements Gram-Schmidt orthogonalization.
+
+    Parameters
+    ----------
+    X : an n x k array with linearly independent columns
+
+    Returns
+    -------
+    U : an n x k array with orthonormal columns
+
+    """
+
+    # Set up
+    n, k = X.shape
+    U = np.empty((n, k))
+    I = np.eye(n)
+
+    # The first col of U is just the normalized first col of X
+    v1 = X[:,0]
+    U[:, 0] = v1 / np.sqrt(np.sum(v1 * v1))
+
+    for i in range(1, k):
+        # Set up
+        b = X[:, i]       # The vector we're going to project
+        Z = X[:, 0:i]     # First i-1 columns of X
+
+        # Project onto the orthogonal complement of the col span of Z
+        M = I - Z @ np.linalg.inv(Z.T @ Z) @ Z.T
+        u = M @ b
+
+        # Normalize
+        U[:, i] = u / np.sqrt(np.sum(u * u))
+
+    return U

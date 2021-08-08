@@ -1,5 +1,6 @@
 import numpy as np 
 from helpers.pca import pca_first_nipals
+from numpy.linalg import norm
 
 def opfs_stochastic_greedy_deflation(X, Nc=1, percentage=0.5):
     """This function implements the Orthogonal Principal Feature Selection algorithm with
@@ -39,97 +40,87 @@ def opfs_stochastic_greedy_deflation(X, Nc=1, percentage=0.5):
     # Initialize storage variables
     S = []
     M = []
-    VarEx = []
+    varEx = []
     compID = []
-    VEX = 0
+    vex = 0
     VT = 0
-    YhatP = 0
-
-    # Keep track of olumns not yet selected
-    col_idxs = np.arange(X.shape[1])
-
-    # Initialise storage for eigen vectors
-    EFS = np.zeros(len(col_idxs))
 
     # Data subset for this iteration
     y_idxs = get_sample_idxs()
     Y = np.take(X, y_idxs, axis=0)
+    
+    # Initialise storage for eigen vectors
+    EFS = np.zeros(Y.shape[1])
 
-    # First component
+    ## First component
     # Column vector containing variance for each column
     VT = np.var(Y)
 
     # Calculate scores of 1st pc for curr_Y using nipals algorithm
-    t1 = pca_first_nipals(Y[:,col_idxs])
+    pc = pca_first_nipals(Y)
 
     # Maximise efs
-    for i in range(len(col_idxs)):
-        x = np.atleast_2d(Y[:,col_idxs[i]]).T
-        EFS[i] = np.divide( np.square(np.matmul(x.T, t1)), np.matmul(x.T,x) + np.finfo(float).eps)
+    for i in range(Y.shape[1]):
+        # feature column f in Y
+        f = np.atleast_2d(Y[:,i]).T
+        corr = np.divide( np.matmul(f.T, pc), norm(f))
+        EFS[i] = corr
 
     # Select variable most correlated with first pc
-    #EFS[compID] = np.nan
     idx = np.nanargmax(EFS)
-    x = np.atleast_2d(Y[:,col_idxs[idx]]).T
+    x = np.atleast_2d(Y[:,idx]).T
 
     # Variance explained using matrix deflation
     th = np.matmul(np.linalg.pinv(x), Y)
     Yhat = np.matmul(x, th)
-    YhatP =  YhatP + Yhat
 
     # Accumulated variance explained
-    VEX = np.divide(np.var(Yhat), VT) * 100
+    vex = np.divide(np.var(Yhat), VT) * 100
 
     # Store results
-    compID.append(col_idxs[idx])
-    VarEx.append(VEX)
-
-    # Update col_idxs bby removing index of selected feature
-    col_idxs = np.delete(col_idxs, idx)
+    compID.append(idx)
+    varEx.append(vex)
     
     # Loop for remaining components
     for _ in range(1, Nc):
-        EFS = np.zeros(len(col_idxs))
+        EFS = np.zeros(Y.shape[1])
 
         # Data subset for this iteration
         y_idxs = get_sample_idxs()
         Y = np.take(X, y_idxs, axis=0)
         
-        # Perform deflation step using the already selected columns
+        # Deflation Step
         for id in compID:
             x = np.atleast_2d(Y[:,id]).T
             th = np.matmul(np.linalg.pinv(x), Y)
             Yhat = np.matmul(x, th)
             Y = Y - Yhat
             M.append(th)
-        
-        # Column vector containing variance for each column
-        VT = np.var(Y)
 
-        # Calculate scores of 1st pc for curr_Y using nipals algorithm
-        t1 = pca_first_nipals(Y[:,col_idxs])
+        # Calculate scores of 1st pc for remaining columns using nipals algorithm
+        pc = pca_first_nipals(Y)
 
         # Maximise efs
-        for i in range(len(col_idxs)):
-            x = np.atleast_2d(Y[:,col_idxs[i]]).T
-            EFS[i] = np.divide( np.square(np.matmul(x.T, t1)), np.matmul(x.T,x) + np.finfo(float).eps)
+        for i in range(Y.shape[1]):
+                # feature column f in Y
+            f = np.atleast_2d(Y[:,i]).T
+            corr = np.divide( np.matmul(f.T, pc), norm(f))
+            EFS[i] = corr
 
         # Select variable most correlated with first pc
-        #EFS[compID] = np.nan
         idx = np.nanargmax(EFS)
-        x = np.atleast_2d(Y[:,col_idxs[idx]]).T
-
+        x = np.atleast_2d(Y[:,idx]).T
+        
         # Variance explained using matrix deflation
         th = np.matmul(np.linalg.pinv(x), Y)
         Yhat = np.matmul(x, th)
 
         # Accumulated variance explained
-        VEX =  np.divide(np.var(Yhat), VT) * 100
+        vex = vex + (np.divide(np.var(Yhat), VT) * 100)
 
         # Store results
-        compID.append(col_idxs[idx])
-        VarEx.append(VEX)
+        compID.append(idx)
+        varEx.append(vex)
 
-        col_idxs = np.delete(col_idxs, idx)
     S = X[:,compID]
-    return S, M, VarEx, compID
+    return S, M, varEx, compID
