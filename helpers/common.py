@@ -2,16 +2,35 @@ import numpy as np
 from numpy.linalg import norm
 
 def read_matrix_from_file(filename):
+    """Read a matrix from a file
+
+    Args:
+        filename (String): The name of the file to read the matrix from
+
+    Returns:
+       mat (2d numpy array): Matrix representing a dataset. m x v -> m is measurements, v is variables
+    """
     mat = np.loadtxt(filename, delimiter=',')
     return mat
 
 def write_matrix_to_file(filename, mat):
+    """Write a 2D numpy array (a matrix) to file
+
+    Args:
+        filename String): The name of the file to wrtie the matrix to
+        mat (2d numpy array): Matrix representing a dataset. m x v -> m is measurements, v is variables
+    """
     np.savetxt(fname=filename, X=mat, delimiter=',' )
 
+def get_random_matrix(mat_size:list):
+    """ Generate 2D numpy array of size mat_size and populate with random samples from a uniform distribution over [0 and 1]
 
-def get_matrix(mat_size:list):
-    # generate 2D numpy array of size mat_size and populate with random samples from a 
-    # uniform distribution over [0 and 1]
+    Args:
+        mat_size (list): A list containing the dimensions of the matrix to be created
+
+    Returns:
+        mat (2d numpy array): Matrix representing a dataset. m x v -> m is measurements, v is variables
+    """
     mat = np.random.rand(mat_size[0], mat_size[1])
     return mat
 
@@ -56,6 +75,7 @@ def pca_first_nipals(X):
 
 def gram_schmidt(X):
     """ Implements Gram-Schmidt orthogonalization.
+    See: https://python-advanced.quantecon.org/orth_proj.html for the source of the algorithm
 
     Args:
         X (A 2D numpy array): The columns of X are linearly independent
@@ -63,7 +83,6 @@ def gram_schmidt(X):
     Returns:
         U: (A 2D numpy array): The column of U are orthonormal
     """
-
     # Set up
     n, k = X.shape
     U = np.empty((n, k))
@@ -88,6 +107,14 @@ def gram_schmidt(X):
     return U
 
 def gs(A):
+    """An alternative method to performing Gram Schmidt orthogonalisation using QR decomposition
+
+    Args:
+        A (A 2D numpy array): The columns of X are linearly independent
+
+    Returns:
+        Q: (A 2D numpy array): The column of Q are orthonormal
+    """
     R = np.zeros((A.shape[1], A.shape[1]))
     Q = np.zeros(A.shape)
     for k in range(A.shape[1]):
