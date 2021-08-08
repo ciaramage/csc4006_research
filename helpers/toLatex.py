@@ -2,9 +2,8 @@
 import latextable
 import matplotlib
 import matplotlib.pyplot as plt
-from numpy import real
 import tikzplotlib
-from helpers.matrix_in_out import read_matrix
+from helpers.common import read_matrix
 from texttable import Texttable
 from helpers.experiment_results import *
 

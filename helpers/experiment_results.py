@@ -1,7 +1,7 @@
 import numpy as np
 from collections import defaultdict
 from helpers.feature_selection import Result, select_features
-from helpers.matrix_in_out import read_matrix
+from helpers.common import read_matrix
 
 algorithm_names = [ 'FSCA', 'LG-FSCA', 'SGO-FSCA', 'SGD-FSCA', 'OPFS', 'SGO-OPFS', 'SGD-OPFS', 'UFS', 'LG-UFS', 'SG-UFS']
 fsca_names = [ 'FSCA', 'LG-FSCA', 'SGO-FSCA', 'SGD-FSCA']

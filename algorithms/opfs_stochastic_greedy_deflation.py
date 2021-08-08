@@ -1,5 +1,5 @@
 import numpy as np 
-from helpers.pca import pca_first_nipals
+from helpers.common import pca_first_nipals
 from numpy.linalg import norm
 
 def opfs_stochastic_greedy_deflation(X, Nc=1, percentage=0.5):

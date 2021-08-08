@@ -1,5 +1,4 @@
 import numpy as np
-from numpy.linalg import qr
 
 def fsca_stochastic_greedy_deflation( X, Nc, percentage=0.5):
     """ This function implements the Forward Selection Component Analysis algorithm with
