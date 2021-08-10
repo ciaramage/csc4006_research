@@ -3,7 +3,7 @@ import latextable
 import matplotlib
 import matplotlib.pyplot as plt
 import tikzplotlib
-from helpers.common import read_matrix
+from helpers.common import read_matrix_from_file
 from texttable import Texttable
 from helpers.experiment_results import *
 
@@ -17,7 +17,7 @@ def realDataInfo():
     rows = []
     rows.append(header)
     for i in range(len(file_names)):
-        mat = read_matrix('data/realData/{0}.txt'.format(file_names[i]))
+        mat = read_matrix_from_file('data/realData/{0}.txt'.format(file_names[i]))
         m, v = mat.shape
         dataset = data_names[i]
         rows.append([dataset, m, v])
@@ -39,7 +39,7 @@ def randomDataInfo():
     rows = []
     rows.append(header)
     for i in range(10):
-        mat = read_matrix('data/randomData/t{0}.txt'.format((i+1)))
+        mat = read_matrix_from_file('data/randomData/t{0}.txt'.format((i+1)))
         m, v = mat.shape
         dataset = 't{0}'.format((i+1))
         rows.append([dataset, m, v])
@@ -104,36 +104,54 @@ def plot_random_times():
         tikzplotlib.save("output/random/randomTime{0}.tex".format(k.upper()))
 
 
-def plot_real(alg_type, dataset):
-    """ Takes output from performing algorithms 'alg_type' on datasets 'dataset' and call relevant functions that 
-    will use the results to create tables and charts and output them to Tex files which can be imported to the Research Article.
+def plot_real(alg_type, dataset, percentage):
+    """ Takes output from performing algorithms 'alg_type' on datasets 'dataset' and call relevant functions that will use the results to create 
+    tables and charts and output them to Tex files which can be imported to the Research Article.
+
+    Args:
+        alg_type (String): Algorithm to perform feature selectio with.
+        dataset (String): Dataset to perform feature selection on.
+        percentage (Float): Percentage value to be used in random sampling if/when stochastic optimisation is being applied.
     """
+    ds, duration, varEx, compID = real_results(alg_type, dataset, percentage)
 
-    #ds, duration, varEx, compID = real_results(alg_type, dataset, 0.4)
+    gLg_compID_table(ds, compID)
+    gLg_varEx_table(ds, varEx)
+    sg_compID_table(ds, compID)
 
-    #gLg_compID_table(ds, compID)
-    #gLg_varEx_table(ds, varEx)
-    #sg_compID_table(ds, compID)
-
-    """ for k in duration.keys():
+    for k in duration.keys():
         print(k)
         print(duration[k])
         print(compID[k])
         print(varEx[k])
-        print('\n') """
+        print('\n')
 
 def plot_real_sg_compare(dataset, percentages):
+    """ Takes output from performing stochastic algorithms on dataset 'dataset' and call relevant functions that will use the results to create 
+    tables and charts and output them to Tex files which can be imported to the Research Article.
 
+    Args:
+        dataset (String): Dataset to perform feature selection on.
+        percentages (List of floats): Percentage values to be use random sampling.
+    """
+    # collect the results
     ds, duration, varEx, compID = real_sg_compare_results(dataset, percentages)
 
-    #sg_compare_duration_table(ds, duration, percentages)
-    #sg_compare_duration_graph(ds, duration, percentages)
-    #sg_compare_compID_table(ds, compID, percentages)
+    # call functions to tabulate and plot results
+    sg_compare_duration_table(ds, duration, percentages)
+    sg_compare_duration_graph(ds, duration, percentages)
+    sg_compare_compID_table(ds, compID, percentages)
     sg_compare_varEx_table(ds, varEx, percentages)
-
 
     
 def gLg_compID_table(ds, compID):
+    """ Accepts results containing selected component data and the name of the dataset the greedy and lazy algorithms selected the features from.
+    Tabulates results and outputs to a Tex file which can be imported to the Research Article.
+
+    Args:
+        ds (String): Dataset feature selection was performed on.
+        compID (Dictionary): Key - Algorithm type, Value - Component indexes of the features selected by that algorithm
+    """
     header = ['k']
     for k in compID.keys():
         header.append(k)
@@ -157,6 +175,13 @@ def gLg_compID_table(ds, compID):
         file.write(outputLatex)
 
 def gLg_varEx_table(ds, varEx):
+    """ Accepts results containing variance explained by selected component data and the name of the dataset the greedy and lazy greedy algorithms selected the features from.
+    Tabulates results and outputs to a Tex file which can be imported to the Research Article.
+
+    Args:
+        ds (String): Dataset feature selection was performed on.
+        varEx (Dictionary): Key - Algorithm type, Value - Variance explained by the features selected by that algorithm
+    """
     header = ['k']
     for k in varEx.keys():
         header.append(k)
@@ -178,6 +203,13 @@ def gLg_varEx_table(ds, varEx):
         file.write(outputLatek)
 
 def sg_compID_table(ds, compID):
+    """ Accepts results containing selected component index data and the name of the dataset the stochastic greedy algorithms selected the features from.
+    Tabulates results and outputs to a Tex file which can be imported to the Research Article.
+
+    Args:
+        ds (String): Dataset feature selection was performed on.
+        compID (Dictionary): Key - Algorithm type, Value - Component indexes of the features selected by that algorithm
+    """
     header = ['K', 1]
     rows = [header]
     x = 2
@@ -201,6 +233,14 @@ def sg_compID_table(ds, compID):
         file.write(outputLatex)
 
 def sg_compare_duration_table(ds, duration, percentages):
+    """ Accepts results containing computation time data and the name of the dataset the stochastic greedy algorithms selected the features from.
+    Tabulates results and outputs to a Tex file which can be imported to the Research Article.
+
+    Args:
+        ds (String): Dataset feature selection was performed on.
+        duration (Dictionary): Key - algorithm type, Value - Dictionary: Key - percentage, Value - The computational time to perform the algorithm given in a list with percentage used in random sampling
+        percentages (List of floats): Percentages values used in random sampling.
+    """
     # Table Header
     header =['Algorithms']
     for p in percentages:
@@ -227,6 +267,14 @@ def sg_compare_duration_table(ds, duration, percentages):
         file.write(outputLatex)
     
 def sg_compare_duration_graph(ds, duration, percentages):
+    """ Accepts results containing computation time data and the name of the dataset the stochastic greedy algorithms selected the features from.
+    Plots results and outputs to a Tex file which can be imported to the Research Article.
+
+    Args:
+        ds (String): Dataset feature selection was performed on.
+        duration (Dictionary): Key - algorithm type, Value - Dictionary: Key - percentage, Value - The computational time to perform the algorithm given in a list with percentage used in random sampling
+        percentages (List of floats): Percentages values used in random sampling.
+    """
     # Setup graph
     fig_size = setupFigure()
     plt.figure(figsize=fig_size)
@@ -250,6 +298,14 @@ def sg_compare_duration_graph(ds, duration, percentages):
     tikzplotlib.save("output/real/{0}/sg_compareDurationGraph.tex".format(ds))
 
 def sg_compare_compID_table(ds, compID, percentages):
+    """ Accepts results containing selected component index data and the name of the dataset the stochastic greedy algorithms selected the features from.
+    Tabulates results and outputs to a Tex file which can be imported to the Research Article.
+
+    Args:
+        ds (String): Dataset feature selection was performed on.
+        compID (Dictionary): Key - algorithm type, Value - Dictionary: Key - percentage, Value - The component indexes selected by the algorithms given in a list with percentage used in random sampling
+        percentages (List of floats): Percentages values used in random sampling.
+    """
     # Table Header
     header = ['\%']
     for i in range(Nc):
@@ -278,6 +334,14 @@ def sg_compare_compID_table(ds, compID, percentages):
             file.write(outputLatex)
 
 def sg_compare_varEx_table(ds, varEx, percentages):
+    """ Accepts results containing variance explained by selected component data and the name of the dataset the stochastic greedy algorithms selected the features from.
+    Tabulates results and outputs to a Tex file which can be imported to the Research Article.
+
+    Args:
+        ds (String): Dataset feature selection was performed on.
+        varEx (Dictionary): Key - algorithm type, Value - Dictionary: Key - percentage, Value - The variance explained by components selected by the algorithms given in a list with percentage used in random sampling
+        percentages (List of floats): Percentages values used in random sampling.
+    """
     # Table Header
     header = ['\%']
     for i in range(Nc):
@@ -306,12 +370,15 @@ def sg_compare_varEx_table(ds, varEx, percentages):
             file.write(outputLatex)
 
 def sg_sample_rows_table():
+    """ Tabulates the number of rows in each random sample by using different percentages in random sampling.
+    Outputs table to a Tex file which can be imported to the Research Article.
+    """
     header = ['']
 
     # rowsDick < key, value> = <dataset name, number of samples>
     rowsDict = defaultdict(int)
     for k in datasets.keys():
-        X = read_matrix(datasets[k])
+        X = read_matrix_from_file(datasets[k])
         rowsDict[k] = X.shape[0]
         header.append(k)
 
@@ -339,6 +406,9 @@ def sg_sample_rows_table():
     
 
 def sg_sample_rows_graph():
+    """ Plots the number of rows in each random sample by using different percentages in random sampling.
+    Outputs plot to a Tex file which can be imported to the Research Article.
+    """
     # graph
     fig_size = setupFigure()
     plt.figure(figsize=fig_size)
@@ -346,7 +416,7 @@ def sg_sample_rows_graph():
     # rowsDick < key, value> = <dataset name, number of samples>
     rowsDict = defaultdict(int)
     for k in datasets.keys():
-        X = read_matrix(datasets[k])
+        X = read_matrix_from_file(datasets[k])
         rowsDict[k] = X.shape[0]
 
     percents = np.arange(start=10, stop=110, step=10)
@@ -363,4 +433,3 @@ def sg_sample_rows_graph():
     plt.legend()
 
     tikzplotlib.save("output/real/sg_sizesGraph.tex")
-
