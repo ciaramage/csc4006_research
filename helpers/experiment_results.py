@@ -1,7 +1,7 @@
 import numpy as np
 from collections import defaultdict
 from helpers.feature_selection import Result, select_features
-from helpers.common import read_matrix
+from helpers.common import read_matrix_from_file
 
 algorithm_names = [ 'FSCA', 'LG-FSCA', 'SGO-FSCA', 'SGD-FSCA', 'OPFS', 'SGO-OPFS', 'SGD-OPFS', 'UFS', 'LG-UFS', 'SG-UFS']
 fsca_names = [ 'FSCA', 'LG-FSCA', 'SGO-FSCA', 'SGD-FSCA']
@@ -25,13 +25,22 @@ datasets = {
 }
 
 def random_duration(alg_type):
+    """ This function performs the feature selection algorithm(s) given by alg_type,
+    on the datasets in the data/randomData directory and returns the results.
+
+    Args:
+        alg_type (String): Must be a key value from the get_names dictionary.
+    Returns:
+        x (list): Contains the dimensions of each dataset
+        duration (dictionary): Key - algorithm name, Value - The computation time to perform the algorithm.
+    """
     names = get_names[alg_type] 
     duration = defaultdict(list)
     compID = defaultdict(list)
     x = []
 
     for i in range(1,11):
-        mat = read_matrix('data/randomData/t{0}.txt'.format(i))
+        mat = read_matrix_from_file('data/randomData/t{0}.txt'.format(i))
         x.append(mat.shape[1])
 
         for alg in names:
@@ -42,9 +51,23 @@ def random_duration(alg_type):
     return x, duration
 
 def real_results(alg_type, ds, percentage=0.5):
+    """ This function performs the feature selection algorithm(s) given by alg_type, on dataset ds, 
+    if an algorithms has stochastic optimisation applied then uses percentage in random sampling, and returns the results
+
+    Args:
+        alg_type (String): Must be a key value from the get_names dictionary.
+        ds (String): Must be a key value from the datasets dictionary.
+        percentage (float, optional): Used in random sampling when a given algorithm has stochastic optimisation applied. Defaults to 0.5.
+
+    Returns:
+        ds (String): The dataset the algorithm(s) that features were selected from. A key value from the datasets dictionary.
+        duration (Dictionary): Key - algorithm type, Value - The computational time to perform the algorithm given in a list.
+        varEx (Dictionary): Key - algorithm type, Value - The variance explained by each feature selected by the algorithm given in a list.
+        compID (Dictionary: Key - algorithm type, Value - The component index of each feature selected by the algorithm given in a list.
+    """
     names = get_names[alg_type]
     data_path = datasets[ds]
-    mat = read_matrix(data_path)
+    mat = read_matrix_from_file(data_path)
 
     duration = defaultdict(list)
     varEx = defaultdict(list)
@@ -67,10 +90,23 @@ def real_results(alg_type, ds, percentage=0.5):
     return ds, duration, varEx, compID
 
 def real_sg_compare_results(ds, percentages):
+    """This function performs the stochastic feature selection algorithm(s) given by alg_type, on dataset ds, using the values in percentages for random sampling.
+
+    Args:
+        ds (String): The dataset the algorithm(s) that features were selected from. A key value from the datasets dictionary.
+        percentages (List): Used in random sampling. The algorithm(s) will be performed and results will be collected for each value given by percentages.
+
+    Returns:
+        ds (String): The dataset the algorithm(s) that features were selected from. A key value from the datasets dictionary.
+        duration (Dictionary): Key - algorithm type, Value - Dictionary: Key - percentage, Value - The computational time to perform the algorithm given in a list.
+        varEx (Dictionary): Key - algorithm type, Value - Dictionary: Key - percentage, Value - The variance explained by each feature selected by the algorithm given in a list.
+        compID (Dictionary: Key - algorithm type, Value - Dictionary: Key - percentage, Value - The component index of each feature selected by the algorithm given in a list.
+    """
+    
     # Get the dataset
     names = get_names['sg']
     data_path = datasets[ds]
-    mat = read_matrix(data_path)
+    mat = read_matrix_from_file(data_path)
 
     # Setup storage for results
     # duration[alg_type][percentage] = list of durations 
