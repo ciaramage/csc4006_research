@@ -1,6 +1,6 @@
 import numpy as np
 from collections import defaultdict
-from helpers.feature_selection import Result, select_features
+from helpers.feature_selection import select_features
 from helpers.common import read_matrix_from_file
 
 algorithm_names = [ 'FSCA', 'LG-FSCA', 'SGO-FSCA', 'SGD-FSCA', 'OPFS', 'SGO-OPFS', 'SGD-OPFS', 'UFS', 'LG-UFS', 'SG-UFS']
@@ -21,7 +21,6 @@ datasets = {
     'Xpitprops': 'data/realData/Xpitprops.txt',
     'frogs': 'data/realData/frogs.txt',
     'breastCancerDiagnosis': 'data/realData/wdbc.txt',
-    'dryBeans': 'data/realData/dryBeans.txt'
 }
 
 def random_duration(alg_type):
@@ -80,12 +79,12 @@ def real_results(alg_type, ds, percentage=0.5):
         compID[alg] = res.component_id
 
     # test output with print statements 
-    for k in duration.keys():
+    """ for k in duration.keys():
         print(k)
         print(duration[k])
         print(varEx[k])
         print(compID[k])
-        print('\n')
+        print('\n') """
     
     return ds, duration, varEx, compID
 

@@ -13,11 +13,12 @@ def opfs_stochastic_greedy_deflation(X, Nc=1, percentage=0.5):
     Args:
         X (A 2D numpy array): The matrix m x v -> m is measurements, v is variables
         Nc (Int): The number of components to select
-        percentage (int, optional): If random sampling occurs with replacement - this is the percentage
-            of data selected from the original data. Defaults to 0.5
+        percentage (int, optional): Random sampling occurs with replacement - this is the percentage
+            of data selected from the original data, given as a decimal < 1.0. Defaults to 0.5
 
     Returns:
         S: The column vectors of each selected feature during each iteration
+        M: List of projection of the selected components onto the subspace spanned by the columns of each randomly sampled subset
         VarEx: The accumulated variance explained with the inclusion of each selected feature
         compID: The component ID of each of the selected features 
     """

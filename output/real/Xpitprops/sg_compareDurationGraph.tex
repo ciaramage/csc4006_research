@@ -13,8 +13,8 @@ legend style={
   fill opacity=0.8,
   draw opacity=1,
   text opacity=1,
-  at={(0.5,0.91)},
-  anchor=north,
+  at={(0.03,0.97)},
+  anchor=north west,
   draw=white!80!black
 },
 tick align=outside,
@@ -25,37 +25,37 @@ xmin=0.28, xmax=0.72,
 xtick style={color=black},
 y grid style={white!69.0196078431373!black},
 ylabel={Computation Time (in seconds)},
-ymin=0.00181785, ymax=0.02459115,
+ymin=0.00199085, ymax=0.03239815,
 ytick style={color=black}
 ]
 \addplot [semithick, color0]
 table {%
-0.3 0.006074
-0.7 0.009329
+0.3 0.00611
+0.7 0.01441
 };
 \addlegendentry{SGO-FSCA}
 \addplot [semithick, color1]
 table {%
-0.3 0.003216
-0.7 0.002853
+0.3 0.003453
+0.7 0.003373
 };
 \addlegendentry{SGD-FSCA}
 \addplot [semithick, color2]
 table {%
-0.3 0.014298
-0.7 0.023556
+0.3 0.012846
+0.7 0.031016
 };
 \addlegendentry{SGO-OPFS}
 \addplot [semithick, color3]
 table {%
-0.3 0.007091
-0.7 0.006701
+0.3 0.010453
+0.7 0.011171
 };
 \addlegendentry{SGD-OPFS}
 \addplot [semithick, color4]
 table {%
-0.3 0.003796
-0.7 0.00332
+0.3 0.003915
+0.7 0.004732
 };
 \addlegendentry{SG-UFS}
 \end{axis}

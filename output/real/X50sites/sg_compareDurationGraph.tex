@@ -25,37 +25,37 @@ xmin=0.28, xmax=0.72,
 xtick style={color=black},
 y grid style={white!69.0196078431373!black},
 ylabel={Computation Time (in seconds)},
-ymin=-0.0002972, ymax=0.1302112,
+ymin=-0.0041297, ymax=0.1704337,
 ytick style={color=black}
 ]
 \addplot [semithick, color0]
 table {%
-0.3 0.021208
-0.7 0.063781
+0.3 0.025011
+0.7 0.129679
 };
 \addlegendentry{SGO-FSCA}
 \addplot [semithick, color1]
 table {%
-0.3 0.006502
-0.7 0.022807
+0.3 0.009086
+0.7 0.031703
 };
 \addlegendentry{SGD-FSCA}
 \addplot [semithick, color2]
 table {%
-0.3 0.030834
-0.7 0.124279
+0.3 0.042286
+0.7 0.162499
 };
 \addlegendentry{SGO-OPFS}
 \addplot [semithick, color3]
 table {%
-0.3 0.01028
-0.7 0.034058
+0.3 0.016458
+0.7 0.052905
 };
 \addlegendentry{SGD-OPFS}
 \addplot [semithick, color4]
 table {%
-0.3 0.00817
-0.7 0.005635
+0.3 0.003805
+0.7 0.006821
 };
 \addlegendentry{SG-UFS}
 \end{axis}

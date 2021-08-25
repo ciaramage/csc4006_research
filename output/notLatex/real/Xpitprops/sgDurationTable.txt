@@ -1,0 +1,7 @@
+Algorithm   Duration
+====================
+SGO-FSCA    0.009584
+SGD-FSCA    0.004617
+SGO-OPFS    0.016754
+SGD-OPFS    0.012041
+ SG-UFS     0.003757

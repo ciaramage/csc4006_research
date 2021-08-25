@@ -1,0 +1,7 @@
+Algorithm   Duration
+====================
+  FSCA      0.024622
+  OPFS      0.123721
+   UFS      0.006998
+ LG-FSCA    0.022868
+ LG-UFS     0.006392

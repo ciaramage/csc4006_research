@@ -1,39 +1,29 @@
-import time
 import numpy as np
 
 
 def main():
     print("main started")
-    #x, d = random_duration('fsca')
-    #plot_random_times()
-    #randomDataInfo()
-    #realDataInfo()
-    X = read_matrix('data/realData/wdbc.txt')
-    #plot_real('glg','Xpitprops')
 
-    real_results('ufs', 'breastCancerDiagnosis', 0.3)
+    realDataInfo()
+    randomDataInfo()
+    plot_random_times()
+    for ds in datasets:
+        plot_glg_real('glg', ds)
+        
+        plot_sg_real('sg',ds, 0.5)
 
-    #real_sg_compare_results('Xpitprops', [0.1,0.3,0.5,0.7,0.9])
-
-    #plot_real_sg_compare('Xpitprops', [0.1,0.3,0.5,0.7,0.9])
-
-    """ sizes = [(50, 20), (100,20), (150,20), (200,20), (250,20), (300,20), (350,20), (400, 20), (450,20), (500,20)]
-
-    for i in range(len(sizes)):
-        mat = get_matrix(sizes[i])
-        write_matrix('data/randomData/t{0}.txt'.format(i+1), mat) """
-
+        plot_real_sg_compare(ds, [0.3, 0.7])
 
 if __name__ == "__main__":
     if __package__ is None:
         import sys
         from os import path
         sys.path.append(path.dirname(path.abspath(__file__)))
-        from helpers.matrix_in_out import *
-        #from helpers.matrix_generator import get_matrix
+        from helpers.common import *
         from helpers.toLatex import *
         from helpers.experiment_results import *
     else:
         from .helpers.experiment_results import *
-
+        from .helpers.common import *
+        from .helpers.toLatex import *
     main()

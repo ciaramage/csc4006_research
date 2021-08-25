@@ -12,7 +12,7 @@ def opfs(X, Nc=1):
 
     Returns:
         S: The column vectors of each selected feature during each iteration
-        M: Used to deflate the matrix at each iteration
+        M: Projection of the selected components onto the subspace spanned by the columns of X
         VarEx: The accumulated variance explained with the inclusion of each selected feature
         compID: The component ID of each of the selected features 
     """
